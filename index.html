@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ATELIER MØRK — Architektur & Materialforschung, Bayreuth</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,300;0,9..144,400;0,9..144,700;1,9..144,200;1,9..144,300;1,9..144,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <!-- Lenis -->
+  <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"></script>
+
+  <style>
+    :root {
+      --bone: #F4F1EC;
+      --ink: #0A0A0A;
+      --sienna: #8B3A1F;
+      --ease-main: cubic-bezier(0.65, 0, 0.35, 1);
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: auto; }
+
+    body {
+      background: var(--ink);
+      color: var(--ink);
+      font-family: 'Geist', 'Inter', system-ui, -apple-system, sans-serif;
+      font-size: 17px;
+      line-height: 1.6;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* ── Custom cursor ── */
+    #cursor {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ffffff;
+      mix-blend-mode: difference;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      transition: opacity 250ms var(--ease-main), transform 80ms linear;
+    }
+    #cursor.active { opacity: 1; }
+    #cursor.large { transform: translate(-50%, -50%) scale(4); }
+
+    /* ── Typography ── */
+    .font-display { font-family: 'Fraunces', Georgia, serif; }
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-weight: 400;
+    }
+
+    /* ── Hero ── */
+    #hero-zone {
+      height: 200vh;
+      position: relative;
+    }
+    #hero {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      background: var(--ink);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow: hidden;
+      z-index: 1;
+    }
+    #hero-topbar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 32px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #hero-title {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: clamp(100px, 20vw, 340px);
+      font-weight: 300;
+      letter-spacing: -0.04em;
+      line-height: 0.88;
+      color: var(--bone);
+      padding: 0 48px;
+      user-select: none;
+    }
+    .o-breathe {
+      display: inline-block;
+      animation: breathe 4s var(--ease-main) infinite;
+      transform-origin: center;
+    }
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); }
+      50%       { transform: scale(1.04); }
+    }
+
+    /* ── White overlay (inversion wipe) ── */
+    #white-wipe {
+      position: fixed;
+      inset: 0;
+      background: var(--bone);
+      z-index: 5;
+      clip-path: inset(100% 0 0 0);
+      pointer-events: none;
+    }
+
+    /* ── Nav mark (appears after inversion) ── */
+    #nav-mark {
+      position: fixed;
+      top: 36px;
+      left: 48px;
+      z-index: 50;
+      opacity: 0;
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 14px;
+      font-weight: 300;
+      letter-spacing: 0.06em;
+      color: var(--ink);
+      pointer-events: none;
+    }
+
+    /* ── Main white content ── */
+    #main-content {
+      background: var(--bone);
+      position: relative;
+      z-index: 10;
+    }
+
+    /* ── Section shared ── */
+    .section-pad { padding: 120px 48px; }
+    .section-pad-lg { padding: 160px 48px; }
+
+    /* ── Manifesto ── */
+    #manifesto { max-width: 860px; }
+    #manifesto-text {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: clamp(22px, 2.4vw, 36px);
+      font-weight: 300;
+      line-height: 1.5;
+      letter-spacing: -0.01em;
+      max-width: 65ch;
+    }
+    .word {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    .glyph-mark {
+      display: inline-block;
+      vertical-align: middle;
+      margin: 0 6px;
+      position: relative;
+      top: -3px;
+    }
+
+    /* ── Project Index ── */
+    #projects { border-top: 1px solid rgba(10,10,10,0.12); }
+    .project-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: 28px 0;
+      border-bottom: 1px solid rgba(10,10,10,0.12);
+      cursor: none;
+      position: relative;
+      overflow: hidden;
+    }
+    .project-row::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 1px;
+      background: var(--ink);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 600ms var(--ease-main);
+    }
+    .project-row:hover::after { transform: scaleX(1); }
+    .project-name {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: clamp(28px, 3.8vw, 58px);
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      transition: transform 400ms var(--ease-main);
+    }
+    .project-row:hover .project-name { transform: translateX(8px); }
+    .project-year {
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      opacity: 0.45;
+      font-weight: 400;
+    }
+
+    /* ── Project Thumbnail Follower ── */
+    #project-thumb {
+      position: fixed;
+      width: 260px;
+      height: 174px;
+      pointer-events: none;
+      z-index: 100;
+      opacity: 0;
+      transform: translate(-50%, -50%);
+      transition: opacity 300ms var(--ease-main);
+      overflow: hidden;
+    }
+    #project-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* ── Featured Project (Horizontal Scroll) ── */
+    #featured {
+      background: var(--ink);
+    }
+    #featured-sticky {
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+    #featured-track {
+      display: flex;
+      align-items: center;
+      gap: 80px;
+      padding: 0 80px;
+      will-change: transform;
+    }
+    #featured-track .feat-intro {
+      flex-shrink: 0;
+      width: 400px;
+    }
+    #featured-track .feat-image {
+      flex-shrink: 0;
+      width: 1200px;
+      height: 72vh;
+      overflow: hidden;
+      position: relative;
+    }
+    #featured-track .feat-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .feat-annotation {
+      position: absolute;
+      color: var(--bone);
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 500ms var(--ease-main), transform 500ms var(--ease-main);
+      max-width: 240px;
+    }
+    .feat-annotation.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .feat-ann-1 { top: 24px; left: 40px; }
+    .feat-ann-2 { top: 44%; left: 42%; transform: translateX(-50%) translateY(12px); }
+    .feat-ann-2.visible { transform: translateX(-50%) translateY(0); }
+    .feat-ann-3 { bottom: 40px; right: 40px; text-align: right; }
+
+    /* ── Materials ── */
+    #materials { background: var(--bone); }
+    .materials-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+    }
+    .material-item {
+      position: relative;
+      overflow: hidden;
+      height: 55vh;
+      cursor: none;
+    }
+    .material-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 900ms var(--ease-main);
+      will-change: transform;
+    }
+    .material-item:hover img { transform: scale(1.08); }
+    .material-label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 24px 28px;
+      background: linear-gradient(transparent, rgba(10,10,10,0.7));
+    }
+    .material-label .mat-name {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 22px;
+      font-weight: 300;
+      letter-spacing: 0.08em;
+      color: var(--bone);
+      display: block;
+      transform: translateY(28px);
+      opacity: 0;
+      transition: transform 500ms var(--ease-main), opacity 500ms var(--ease-main);
+    }
+    .material-label .mat-sub {
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: rgba(244,241,236,0.6);
+      display: block;
+      margin-top: 4px;
+      transform: translateY(28px);
+      opacity: 0;
+      transition: transform 500ms 60ms var(--ease-main), opacity 500ms 60ms var(--ease-main);
+    }
+    .material-item:hover .mat-name,
+    .material-item:hover .mat-sub {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* ── Prozess ── */
+    #prozess { background: var(--bone); }
+    .prozess-item {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 40px;
+      align-items: start;
+      padding: 48px 0;
+      border-top: 1px solid rgba(10,10,10,0.10);
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    .prozess-num {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      opacity: 0.35;
+      padding-top: 6px;
+    }
+    .prozess-title {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: clamp(24px, 2.4vw, 36px);
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      margin-bottom: 12px;
+      line-height: 1.1;
+    }
+    .prozess-text {
+      font-size: 15px;
+      line-height: 1.65;
+      opacity: 0.65;
+      max-width: 55ch;
+    }
+
+    /* ── Awards Marquee ── */
+    #awards {
+      background: var(--ink);
+      overflow: hidden;
+      border-top: 1px solid rgba(244,241,236,0.08);
+      border-bottom: 1px solid rgba(244,241,236,0.08);
+    }
+    .marquee-outer {
+      display: flex;
+      overflow: hidden;
+      padding: 28px 0;
+    }
+    .marquee-track {
+      display: flex;
+      gap: 0;
+      animation: marquee 22s linear infinite;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .marquee-item {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: clamp(18px, 2vw, 26px);
+      font-weight: 300;
+      color: rgba(244,241,236,0.55);
+      padding: 0 64px;
+      letter-spacing: 0.02em;
+    }
+    .marquee-item span {
+      display: inline-block;
+      vertical-align: middle;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: rgba(244,241,236,0.25);
+      margin-right: 64px;
+    }
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ── Kontakt ── */
+    #kontakt {
+      background: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 80px 48px;
+      position: relative;
+    }
+    .kontakt-kicker {
+      color: rgba(244,241,236,0.35);
+      margin-bottom: 40px;
+    }
+    #kontakt-headline {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: clamp(52px, 7.2vw, 122px);
+      font-weight: 300;
+      letter-spacing: -0.03em;
+      line-height: 0.92;
+      color: var(--bone);
+      max-width: 18ch;
+    }
+    .kontakt-link {
+      display: inline-block;
+      margin-top: 64px;
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(244,241,236,0.5);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(244,241,236,0.2);
+      padding-bottom: 4px;
+      transition: color 300ms var(--ease-main), border-color 300ms var(--ease-main);
+    }
+    .kontakt-link:hover { color: var(--bone); border-color: var(--bone); }
+
+    /* ── Footer ── */
+    #footer {
+      background: var(--ink);
+      border-top: 1px solid rgba(244,241,236,0.08);
+      padding: 56px 48px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 40px;
+      align-items: end;
+    }
+    #footer .f-label {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(244,241,236,0.25);
+      margin-bottom: 12px;
+    }
+    #footer .f-val {
+      font-size: 14px;
+      color: rgba(244,241,236,0.55);
+      line-height: 1.8;
+    }
+    #footer .f-socials a {
+      display: block;
+      font-size: 13px;
+      letter-spacing: 0.12em;
+      color: rgba(244,241,236,0.4);
+      text-decoration: none;
+      margin-bottom: 6px;
+      cursor: none;
+    }
+    .footer-mark {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 13px;
+      font-weight: 300;
+      letter-spacing: 0.06em;
+      color: rgba(244,241,236,0.2);
+    }
+
+    /* ── Reduced motion ── */
+    @media (prefers-reduced-motion: reduce) {
+      .o-breathe { animation: none; }
+      .marquee-track { animation: none; }
+      .word {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+      }
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 0; }
+  </style>
+</head>
+<body>
+
+  <!-- ── Custom cursor ── -->
+  <div id="cursor"></div>
+
+  <!-- ── Nav wordmark (appears after inversion) ── -->
+  <div id="nav-mark">ATELIER MØRK</div>
+
+  <!-- ── Project thumbnail follower ── -->
+  <div id="project-thumb">
+    <img src="" alt="Project preview" id="thumb-img">
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- §1 + §2: HERO + INVERSION                  -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div id="hero-zone">
+    <section id="hero">
+      <!-- Top bar -->
+      <div id="hero-topbar">
+        <span class="eyebrow" style="color:rgba(244,241,236,0.4); letter-spacing:0.18em;">
+          EST. 2019 · BAYREUTH · DE
+        </span>
+        <span class="eyebrow" style="color:rgba(244,241,236,0.4);" id="hero-time">
+          00:00:00
+        </span>
+      </div>
+
+      <!-- Main title -->
+      <div id="hero-title" aria-label="Atelier Mørk">
+        ATELIER M<span class="o-breathe">Ø</span>RK
+      </div>
+
+      <!-- Subtle category line -->
+      <div style="padding: 28px 48px 0; display:flex; align-items:center; gap:24px;">
+        <span class="eyebrow" style="color:rgba(244,241,236,0.22);">Architektur</span>
+        <span style="width:40px; height:1px; background:rgba(244,241,236,0.15); display:inline-block;"></span>
+        <span class="eyebrow" style="color:rgba(244,241,236,0.22);">Materialforschung</span>
+      </div>
+    </section>
+  </div>
+
+  <!-- ── White wipe overlay ── -->
+  <div id="white-wipe"></div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- MAIN WHITE CONTENT (§3–§10)                -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div id="main-content">
+
+    <!-- ── §3 MANIFESTO ── -->
+    <section class="section-pad-lg" style="padding-bottom:100px;">
+      <div id="manifesto" style="padding-top:40px;">
+        <p class="eyebrow" style="opacity:0; margin-bottom:48px; transform:translateY(10px);" id="manifesto-kicker">
+          Über uns
+        </p>
+        <p id="manifesto-text">
+          <!-- Words split by JS -->
+          Material ist Gedächtnis. Architektur ist Akt.
+          <span class="glyph-mark" aria-hidden="true">
+            <svg width="24" height="32" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2.5 C7 6, 3.5 12, 4.5 19 C5.5 25.5, 9.5 29.5, 12 29.5" stroke="#0A0A0A" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+              <path d="M12 2.5 C17 6, 20.5 12, 19.5 19 C18.5 25.5, 14.5 29.5, 12 29.5" stroke="#0A0A0A" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+              <path d="M5.5 16.5 L18.5 16.5" stroke="#0A0A0A" stroke-width="1" stroke-linecap="round"/>
+              <path d="M12 2.5 L12 29.5" stroke="#0A0A0A" stroke-width="0.6" stroke-linecap="round" opacity="0.4"/>
+            </svg>
+          </span>
+          Jedes Projekt entsteht aus einem Gespräch
+          zwischen Beton und Licht, zwischen dem Dauerhaften
+          und dem Vergänglichen. Wir entwerfen nicht für
+          das Bild, sondern für den Moment, in dem Raum
+          auf Körper trifft und beide sich verändern.
+        </p>
+      </div>
+    </section>
+
+    <!-- ── §4 PROJECT INDEX ── -->
+    <section id="projects" class="section-pad" style="padding-top:0;">
+      <p class="eyebrow" style="opacity:0; margin-bottom:56px; padding-top:80px; border-top:1px solid rgba(10,10,10,0.10); transform:translateY(10px);" id="projects-kicker">Ausgewählte Arbeiten</p>
+
+      <div id="project-list">
+        <div class="project-row"
+             data-img="https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=600&q=80">
+          <span class="project-name">HAUS SOLITUDE</span>
+          <span class="project-year">2024</span>
+        </div>
+        <div class="project-row"
+             data-img="https://images.unsplash.com/photo-1464038008305-ee1e7c3c45d2?w=600&q=80">
+          <span class="project-name">WERKRAUM KULMBACH</span>
+          <span class="project-year">2023</span>
+        </div>
+        <div class="project-row"
+             data-img="https://images.unsplash.com/photo-1518005020951-eccb494ad742?w=600&q=80">
+          <span class="project-name">BRÜCKENHAUS MAIN</span>
+          <span class="project-year">2023</span>
+        </div>
+        <div class="project-row"
+             data-img="https://images.unsplash.com/photo-1510798831971-661eb04b3739?w=600&q=80">
+          <span class="project-name">PAVILION FRANKEN</span>
+          <span class="project-year">2022</span>
+        </div>
+        <div class="project-row"
+             data-img="https://images.unsplash.com/photo-1449157291145-7efd050a4d0e?w=600&q=80">
+          <span class="project-name">ATELIER NORD</span>
+          <span class="project-year">2022</span>
+        </div>
+        <div class="project-row"
+             data-img="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80">
+          <span class="project-name">TURNHALLE REIMAGINED</span>
+          <span class="project-year">2021</span>
+        </div>
+        <div class="project-row"
+             data-img="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=600&q=80">
+          <span class="project-name">WOHNHAUS EREMITAGE</span>
+          <span class="project-year">2020</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── §5 FEATURED PROJECT (Horizontal Pin) ── -->
+    <section id="featured">
+        <div id="featured-sticky">
+          <div id="featured-track">
+
+            <!-- Intro panel -->
+            <div class="feat-intro">
+              <p class="eyebrow" style="color:rgba(139,58,31,1); margin-bottom:28px;">
+                Projekt im Detail
+              </p>
+              <h2 class="font-display" style="font-size:clamp(36px,3.6vw,58px); font-weight:300; letter-spacing:-0.02em; color:var(--bone); line-height:1.1; margin-bottom:24px;">
+                Haus Solitude,<br>Bayreuth
+              </h2>
+              <p style="font-size:14px; color:rgba(244,241,236,0.45); line-height:1.7; max-width:38ch;">
+                Sichtbeton, Eichenholz, beschichteter Stahl.<br>
+                Fertigstellung 2024, 340 m².
+              </p>
+            </div>
+
+            <!-- Wide panorama -->
+            <div class="feat-image">
+              <img
+                src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=2400&q=80"
+                alt="Haus Solitude — Außenansicht Westfassade"
+                loading="lazy">
+
+              <!-- Annotations -->
+              <div class="feat-annotation feat-ann-1" id="feat-ann-1">
+                <span class="eyebrow" style="color:rgba(244,241,236,0.45); font-size:10px; display:block; margin-bottom:6px;">Material</span>
+                <span style="font-family:'Fraunces',serif; font-size:16px; font-weight:300; color:var(--bone);">Sichtbeton C30/37, ungeschliffen, mit Holzbrettschalung.</span>
+              </div>
+
+              <div class="feat-annotation feat-ann-2" id="feat-ann-2">
+                <span class="eyebrow" style="color:rgba(244,241,236,0.45); font-size:10px; display:block; margin-bottom:6px;">Struktur</span>
+                <span style="font-family:'Fraunces',serif; font-size:16px; font-weight:300; color:var(--bone);">Tragendes Skelett aus warmgewalztem Stahl, sichtbar gelassen.</span>
+              </div>
+
+              <div class="feat-annotation feat-ann-3" id="feat-ann-3">
+                <span class="eyebrow" style="color:rgba(244,241,236,0.45); font-size:10px; display:block; margin-bottom:6px;">Öffnungen</span>
+                <span style="font-family:'Fraunces',serif; font-size:16px; font-weight:300; color:var(--bone);">Raumhohe Verglasungen nach Südwest, Lärcheholzrahmen.</span>
+              </div>
+            </div>
+
+            <!-- Trailing spacer -->
+            <div style="flex-shrink:0; width:200px;"></div>
+          </div>
+        </div>
+    </section>
+
+    <!-- ── §6 MATERIALS ── -->
+    <section id="materials">
+      <div class="section-pad" style="padding-bottom:56px;">
+        <p class="eyebrow" style="opacity:0.35; margin-bottom:0;" id="materials-kicker">Materialien</p>
+      </div>
+      <div class="materials-grid">
+        <div class="material-item">
+          <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"
+               alt="Beton — Rohbeton mit Schalung" loading="lazy">
+          <div class="material-label">
+            <span class="mat-name">Beton</span>
+            <span class="mat-sub">Sichtbeton · roh</span>
+          </div>
+        </div>
+        <div class="material-item">
+          <img src="https://images.unsplash.com/photo-1541123437800-1bb1317badc2?w=800&q=80"
+               alt="Eiche — massives Eichenholz geölt" loading="lazy">
+          <div class="material-label">
+            <span class="mat-name">Eiche</span>
+            <span class="mat-sub">Massivholz · geölt</span>
+          </div>
+        </div>
+        <div class="material-item">
+          <img src="https://images.unsplash.com/photo-1518640467707-6e573d9dc43e?w=800&q=80"
+               alt="Stahl — warmgewalzter Baustahl" loading="lazy">
+          <div class="material-label">
+            <span class="mat-name">Stahl</span>
+            <span class="mat-sub">Warmgewalzt · roh</span>
+          </div>
+        </div>
+        <div class="material-item">
+          <img src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&q=80"
+               alt="Glas — strukturelles Isolierglas" loading="lazy">
+          <div class="material-label">
+            <span class="mat-name">Glas</span>
+            <span class="mat-sub">Isolierverglasung · klar</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── §7 PROZESS ── -->
+    <section id="prozess" class="section-pad">
+      <p class="eyebrow" style="opacity:0.35; margin-bottom:72px;" id="prozess-kicker">Arbeitsweise</p>
+
+      <div class="prozess-item" id="pz-1">
+        <span class="prozess-num">01</span>
+        <div>
+          <h3 class="prozess-title">Entwurf</h3>
+          <p class="prozess-text">Der erste Gedanke ist selten der letzte, aber immer der ehrlichste.</p>
+        </div>
+      </div>
+      <div class="prozess-item" id="pz-2">
+        <span class="prozess-num">02</span>
+        <div>
+          <h3 class="prozess-title">Prüfung</h3>
+          <p class="prozess-text">Material und Tragwerk werden gemeinsam befragt, nicht nacheinander.</p>
+        </div>
+      </div>
+      <div class="prozess-item" id="pz-3">
+        <span class="prozess-num">03</span>
+        <div>
+          <h3 class="prozess-title">Entwicklung</h3>
+          <p class="prozess-text">Details wachsen aus dem Ganzen heraus, nie umgekehrt.</p>
+        </div>
+      </div>
+      <div class="prozess-item" id="pz-4">
+        <span class="prozess-num">04</span>
+        <div>
+          <h3 class="prozess-title">Ausführung</h3>
+          <p class="prozess-text">Handwerk ist das Gespräch zwischen Zeichnung und Wirklichkeit.</p>
+        </div>
+      </div>
+      <div class="prozess-item" id="pz-5" style="border-bottom:1px solid rgba(10,10,10,0.10);">
+        <span class="prozess-num">05</span>
+        <div>
+          <h3 class="prozess-title">Übergabe</h3>
+          <p class="prozess-text">Ein Gebäude gehört erst dem Ort, wenn es ihn verändert hat.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── §8 AUSZEICHNUNGEN (Marquee) ── -->
+    <section id="awards">
+      <div class="marquee-outer" aria-label="Featured in">
+        <!-- Track A + Track B (duplicate for seamless loop) -->
+        <div class="marquee-track" aria-hidden="true">
+          <span class="marquee-item">Dezeen<span></span></span>
+          <span class="marquee-item">Wallpaper*<span></span></span>
+          <span class="marquee-item">AD Germany<span></span></span>
+          <span class="marquee-item">Detail<span></span></span>
+          <span class="marquee-item">Baumeister<span></span></span>
+          <span class="marquee-item">ArchDaily<span></span></span>
+          <span class="marquee-item">Domus<span></span></span>
+          <span class="marquee-item">Moderne Regional<span></span></span>
+          <!-- Duplicate -->
+          <span class="marquee-item">Dezeen<span></span></span>
+          <span class="marquee-item">Wallpaper*<span></span></span>
+          <span class="marquee-item">AD Germany<span></span></span>
+          <span class="marquee-item">Detail<span></span></span>
+          <span class="marquee-item">Baumeister<span></span></span>
+          <span class="marquee-item">ArchDaily<span></span></span>
+          <span class="marquee-item">Domus<span></span></span>
+          <span class="marquee-item">Moderne Regional<span></span></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── §9 KONTAKT ── -->
+    <section id="kontakt">
+      <p class="eyebrow kontakt-kicker">Kontakt</p>
+      <h2 id="kontakt-headline" class="font-display">
+        Werkstatt für<br>neue Baukunst
+      </h2>
+      <a href="mailto:hallo@ateliermork.de" class="kontakt-link" tabindex="-1">
+        hallo@ateliermork.de
+      </a>
+    </section>
+
+    <!-- ── §10 FOOTER ── -->
+    <footer id="footer">
+      <div>
+        <p class="footer-mark">ATELIER MØRK</p>
+        <p class="f-val" style="margin-top:16px;">
+          Maximilianstraße 14<br>
+          95444 Bayreuth, DE
+        </p>
+      </div>
+
+      <div>
+        <p class="f-label">Folgen</p>
+        <div class="f-socials">
+          <a href="#">↗ Instagram</a>
+          <a href="#">↗ LinkedIn</a>
+          <a href="#">↗ Dezeen</a>
+        </div>
+      </div>
+
+      <div style="text-align:right;">
+        <p class="f-label">Ortszeit Bayreuth</p>
+        <p class="f-val" id="footer-time">00:00</p>
+        <p class="f-val" style="margin-top:8px; opacity:0.45; font-size:13px;" id="footer-weather">
+          12°C · bedeckt · Wind aus NW
+        </p>
+      </div>
+    </footer>
+
+  </div><!-- #main-content -->
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!-- SCRIPTS                                     -->
+  <!-- ═══════════════════════════════════════════ -->
+  <script>
+  (function () {
+    'use strict';
+
+    /* ── Cursor ── */
+    const cursor = document.getElementById('cursor');
+    let mx = -100, my = -100;
+
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX;
+      my = e.clientY;
+      cursor.style.left = mx + 'px';
+      cursor.style.top  = my + 'px';
+      if (!cursor.classList.contains('active')) cursor.classList.add('active');
+    });
+    document.addEventListener('mouseleave', () => cursor.classList.remove('active'));
+
+    /* ── Live clocks ── */
+    function pad(n) { return String(n).padStart(2, '0'); }
+    function tick() {
+      const now = new Date();
+      const hms = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      const hm  = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+      const el1 = document.getElementById('hero-time');
+      const el2 = document.getElementById('footer-time');
+      if (el1) el1.textContent = hms;
+      if (el2) el2.textContent = hm + ' CET';
+    }
+    tick();
+    setInterval(tick, 1000);
+
+    /* ── Lenis smooth scroll ── */
+    const lenis = new Lenis({ lerp: 0.08, smoothWheel: true });
+    function rafLoop(time) { lenis.raf(time); requestAnimationFrame(rafLoop); }
+    requestAnimationFrame(rafLoop);
+
+    /* ── GSAP register ── */
+    gsap.registerPlugin(ScrollTrigger);
+
+    // Keep ScrollTrigger in sync with Lenis
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.lagSmoothing(0);
+
+    /* ─────────────────────────────────────────── */
+    /* §2  INVERSION WIPE                          */
+    /* ─────────────────────────────────────────── */
+    const wipe    = document.getElementById('white-wipe');
+    const navMark = document.getElementById('nav-mark');
+
+    gsap.timeline({
+      scrollTrigger: {
+        trigger: '#hero-zone',
+        start: '40% top',          // wipe begins after hero is well-established
+        end: 'bottom top',
+        scrub: 1,
+      }
+    })
+    .fromTo(wipe,
+      { clipPath: 'inset(100% 0 0 0)' },
+      { clipPath: 'inset(0% 0 0 0)', ease: 'none' }
+    )
+    .fromTo(navMark,
+      { opacity: 0, y: -6 },
+      { opacity: 1, y: 0, ease: 'none', duration: 0.3 },
+      0.7  // starts at 70% through the wipe timeline
+    );
+
+    /* ─────────────────────────────────────────── */
+    /* §3  MANIFESTO — word-by-word reveal         */
+    /* ─────────────────────────────────────────── */
+    const manifestoEl = document.getElementById('manifesto-text');
+
+    // Replace glyph span with placeholder so it survives the word-split
+    const glyphPlaceholder = '___GLYPH___';
+    manifestoEl.innerHTML = manifestoEl.innerHTML.replace(
+      /<span class="glyph-mark"[\s\S]*?<\/span>/,
+      glyphPlaceholder
+    );
+
+    const rawText = manifestoEl.textContent;
+    const words   = rawText.trim().split(/\s+/);
+
+    let html = '';
+    words.forEach(w => {
+      if (w === glyphPlaceholder) {
+        html += `<span class="glyph-mark" aria-hidden="true">
+          <svg width="24" height="32" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2.5 C7 6, 3.5 12, 4.5 19 C5.5 25.5, 9.5 29.5, 12 29.5" stroke="#0A0A0A" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+            <path d="M12 2.5 C17 6, 20.5 12, 19.5 19 C18.5 25.5, 14.5 29.5, 12 29.5" stroke="#0A0A0A" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+            <path d="M5.5 16.5 L18.5 16.5" stroke="#0A0A0A" stroke-width="1" stroke-linecap="round"/>
+            <path d="M12 2.5 L12 29.5" stroke="#0A0A0A" stroke-width="0.6" stroke-linecap="round" opacity="0.4"/>
+          </svg>
+        </span> `;
+      } else {
+        html += `<span class="word">${w}</span> `;
+      }
+    });
+    manifestoEl.innerHTML = html;
+
+    // Kicker reveal
+    gsap.to('#manifesto-kicker', {
+      opacity: 0.35, y: 0, duration: 0.6, ease: 'power2.out',
+      scrollTrigger: { trigger: '#manifesto-kicker', start: 'top 85%' }
+    });
+
+    // Words
+    gsap.to('.word', {
+      opacity: 1,
+      y: 0,
+      duration: 0.45,
+      stagger: 0.08,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: '#manifesto-text',
+        start: 'top 72%',
+        toggleActions: 'play none none none',
+      }
+    });
+
+    /* ─────────────────────────────────────────── */
+    /* §4  PROJECT INDEX — cursor thumbnail        */
+    /* ─────────────────────────────────────────── */
+    gsap.to('#projects-kicker', {
+      opacity: 0.35, y: 0, duration: 0.6, ease: 'power2.out',
+      scrollTrigger: { trigger: '#projects-kicker', start: 'top 85%' }
+    });
+
+    const thumb      = document.getElementById('project-thumb');
+    const thumbImg   = document.getElementById('thumb-img');
+    const rows       = document.querySelectorAll('.project-row');
+    let tX = -300, tY = -300;
+    let tTargetX = -300, tTargetY = -300;
+
+    document.addEventListener('mousemove', e => {
+      tTargetX = e.clientX;
+      tTargetY = e.clientY;
+    });
+
+    (function lerpThumb() {
+      tX += (tTargetX - tX) * 0.10;
+      tY += (tTargetY - tY) * 0.10;
+      thumb.style.left = tX + 'px';
+      thumb.style.top  = tY + 'px';
+      requestAnimationFrame(lerpThumb);
+    })();
+
+    rows.forEach(row => {
+      const src = row.dataset.img;
+      row.addEventListener('mouseenter', () => {
+        thumbImg.src = src;
+        thumb.style.opacity = '1';
+      });
+      row.addEventListener('mouseleave', () => {
+        thumb.style.opacity = '0';
+      });
+    });
+
+    // Staggered row entrance
+    gsap.from('.project-row', {
+      opacity: 0,
+      y: 16,
+      duration: 0.6,
+      stagger: 0.07,
+      ease: 'power2.out',
+      scrollTrigger: {
+        trigger: '#project-list',
+        start: 'top 80%',
+      }
+    });
+
+    /* ─────────────────────────────────────────── */
+    /* §5  FEATURED — horizontal scroll pin        */
+    /* ─────────────────────────────────────────── */
+    const featTrack = document.getElementById('featured-track');
+
+    function featScrollDist() {
+      return featTrack.scrollWidth - window.innerWidth + 160;
+    }
+
+    const featST = ScrollTrigger.create({
+      trigger: '#featured-sticky',
+      start: 'top top',
+      end: () => '+=' + featScrollDist(),
+      pin: true,
+      scrub: 1,
+      invalidateOnRefresh: true,
+      onUpdate(self) {
+        const x = -featScrollDist() * self.progress;
+        gsap.set(featTrack, { x });
+        // Annotations
+        const p = self.progress;
+        document.getElementById('feat-ann-1').classList.toggle('visible', p > 0.12 && p < 0.55);
+        document.getElementById('feat-ann-2').classList.toggle('visible', p > 0.35 && p < 0.75);
+        document.getElementById('feat-ann-3').classList.toggle('visible', p > 0.62);
+      }
+    });
+
+    /* ─────────────────────────────────────────── */
+    /* §6  MATERIALS kicker                        */
+    /* ─────────────────────────────────────────── */
+    gsap.from('#materials-kicker', {
+      opacity: 0, y: 10, duration: 0.6, ease: 'power2.out',
+      scrollTrigger: { trigger: '#materials-kicker', start: 'top 85%' }
+    });
+
+    /* ─────────────────────────────────────────── */
+    /* §7  PROZESS — staggered reveal + parallax   */
+    /* ─────────────────────────────────────────── */
+    gsap.from('#prozess-kicker', {
+      opacity: 0, y: 10, duration: 0.6, ease: 'power2.out',
+      scrollTrigger: { trigger: '#prozess-kicker', start: 'top 85%' }
+    });
+
+    const prozessItems = document.querySelectorAll('.prozess-item');
+    prozessItems.forEach((item, i) => {
+      gsap.to(item, {
+        opacity: 1,
+        y: 0,
+        duration: 0.65,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: item,
+          start: 'top 82%',
+          toggleActions: 'play none none none',
+        },
+        delay: i * 0.04,
+      });
+
+      // Subtle parallax on title
+      gsap.to(item.querySelector('.prozess-title'), {
+        y: -20,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: item,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: 1.2,
+        }
+      });
+    });
+
+    /* ─────────────────────────────────────────── */
+    /* §9  KONTAKT — headline entrance             */
+    /* ─────────────────────────────────────────── */
+    gsap.from('#kontakt-headline', {
+      opacity: 0,
+      y: 18,
+      duration: 1.0,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: '#kontakt',
+        start: 'top 70%',
+      }
+    });
+
+    // Kontakt custom cursor behaviour
+    const kontakt = document.getElementById('kontakt');
+    kontakt.addEventListener('mouseenter', () => {
+      cursor.classList.add('large');
+    });
+    kontakt.addEventListener('mouseleave', () => {
+      cursor.classList.remove('large');
+    });
+
+    /* ─────────────────────────────────────────── */
+    /* Reduced motion override                     */
+    /* ─────────────────────────────────────────── */
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      document.querySelectorAll('.word').forEach(w => {
+        w.style.opacity = '1';
+        w.style.transform = 'none';
+      });
+    }
+
+    /* ─────────────────────────────────────────── */
+    /* ScrollTrigger refresh on fonts load         */
+    /* ─────────────────────────────────────────── */
+    document.fonts.ready.then(() => ScrollTrigger.refresh());
+
+  })();
+  </script>
+</body>
+</html>
