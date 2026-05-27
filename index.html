@@ -506,6 +506,168 @@
 
     /* ── Scrollbar ── */
     ::-webkit-scrollbar { width: 0; }
+
+    /* ═══════════════════════════════════════════════ */
+    /* CINEMATIC INTRO                                 */
+    /* ═══════════════════════════════════════════════ */
+
+    /* Pause breathing until intro timeline fires it */
+    .o-breathe { animation-play-state: paused; }
+
+    /* Hero bg layers — populated by JS post-intro */
+    #hero-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    #hero-bg-gradient {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: linear-gradient(to bottom,
+        rgba(10,10,10,0.84) 0%,
+        rgba(10,10,10,0.0) 44%);
+      pointer-events: none;
+    }
+    #hero-topbar    { z-index: 2; }
+    #hero-title     { position: relative; z-index: 2; }
+    .hero-cat-line  { position: relative; z-index: 2; }
+
+    /* Intro overlay — full-screen cover */
+    #intro {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: var(--ink);
+      overflow: hidden;
+    }
+
+    /* Phase 1 — horizontal hairline */
+    #intro-line {
+      position: absolute;
+      top: calc(50% - 0.5px);
+      left: 15vw;
+      width: 70vw;
+      height: 1px;
+      background: rgba(255,255,255,0.8);
+      transform-origin: 50% 50%;
+      transform: scaleX(0);
+    }
+
+    /* Phase 1 — establishment label */
+    #intro-est {
+      position: absolute;
+      top: calc(50% + 14px);
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.38);
+      white-space: nowrap;
+      opacity: 0;
+    }
+
+    /* Phase 2 — facade (perspective wrapper + bordered box) */
+    #intro-facade-wrap {
+      position: absolute;
+      inset: 0;
+      perspective: 2000px;
+      pointer-events: none;
+    }
+    #intro-facade {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: calc(50vh * 1.3333);
+      height: 50vh;
+      border: 1px solid rgba(255,255,255,0.68);
+      overflow: hidden;
+      /* All transforms owned by GSAP */
+    }
+
+    /* Phase 3 — concrete image inside facade */
+    #intro-concrete-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 40%;
+      opacity: 0;
+      display: block;
+    }
+
+    /* Phase 3–4 — gradient inside facade / covering bg */
+    #intro-fg-gradient {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: linear-gradient(to bottom,
+        rgba(10,10,10,0.86) 0%,
+        rgba(10,10,10,0.0) 42%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Phase 5 — title + UI elements */
+    #intro-title-wrap {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 48px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    #intro-title {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: clamp(100px, 20vw, 340px);
+      font-weight: 300;
+      letter-spacing: -0.04em;
+      line-height: 0.88;
+      color: rgba(255,255,255,0.96);
+      user-select: none;
+    }
+    .intro-letter {
+      display: inline-block;
+      opacity: 0;
+      /* initial y set by GSAP */
+    }
+    .intro-space {
+      display: inline-block;
+      width: 0.28em;
+    }
+    #intro-topbar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      padding: 32px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 3;
+      opacity: 0;
+    }
+    #intro-category {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 0 48px 36px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      z-index: 3;
+      opacity: 0;
+    }
+
+    /* Reduced motion: skip intro entirely */
+    @media (prefers-reduced-motion: reduce) {
+      #intro { display: none; }
+      .o-breathe { animation-play-state: running; }
+    }
   </style>
 </head>
 <body>
@@ -522,10 +684,60 @@
   </div>
 
   <!-- ═══════════════════════════════════════════ -->
+  <!-- CINEMATIC INTRO (plays once on load)        -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div id="intro" role="presentation" aria-hidden="true">
+
+    <!-- Phase 1: hairline -->
+    <div id="intro-line"></div>
+
+    <!-- Phase 1: establishment label -->
+    <div id="intro-est">EST. 2019 · BAYREUTH · DE</div>
+
+    <!-- Phase 2–4: perspective facade / expanding plate -->
+    <div id="intro-facade-wrap">
+      <div id="intro-facade">
+        <img id="intro-concrete-img"
+             src="https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=1920&q=90"
+             alt=""
+             loading="eager"
+             fetchpriority="high">
+        <div id="intro-fg-gradient"></div>
+      </div>
+    </div>
+
+    <!-- Phase 5+: title and persistent UI -->
+    <div id="intro-title-wrap">
+      <div id="intro-topbar">
+        <span class="eyebrow" style="color:rgba(255,255,255,0.42); letter-spacing:0.18em;">
+          EST. 2019 · BAYREUTH · DE
+        </span>
+        <span class="eyebrow" style="color:rgba(255,255,255,0.42);" id="intro-clock">
+          00:00:00
+        </span>
+      </div>
+
+      <div id="intro-title" aria-label="Atelier Mørk">
+        <!-- letter spans built by JS -->
+      </div>
+
+      <div id="intro-category">
+        <span class="eyebrow" style="color:rgba(255,255,255,0.22);">Architektur</span>
+        <span style="width:40px; height:1px; background:rgba(255,255,255,0.14); display:inline-block;"></span>
+        <span class="eyebrow" style="color:rgba(255,255,255,0.22);">Materialforschung</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
   <!-- §1 + §2: HERO + INVERSION                  -->
   <!-- ═══════════════════════════════════════════ -->
   <div id="hero-zone">
     <section id="hero">
+      <!-- Concrete bg layers (set by intro JS on completion) -->
+      <div id="hero-bg"></div>
+      <div id="hero-bg-gradient"></div>
+
       <!-- Top bar -->
       <div id="hero-topbar">
         <span class="eyebrow" style="color:rgba(244,241,236,0.4); letter-spacing:0.18em;">
@@ -542,7 +754,7 @@
       </div>
 
       <!-- Subtle category line -->
-      <div style="padding: 28px 48px 0; display:flex; align-items:center; gap:24px;">
+      <div class="hero-cat-line" style="padding: 28px 48px 0; display:flex; align-items:center; gap:24px;">
         <span class="eyebrow" style="color:rgba(244,241,236,0.22);">Architektur</span>
         <span style="width:40px; height:1px; background:rgba(244,241,236,0.15); display:inline-block;"></span>
         <span class="eyebrow" style="color:rgba(244,241,236,0.22);">Materialforschung</span>
@@ -829,6 +1041,206 @@
   <!-- SCRIPTS                                     -->
   <!-- ═══════════════════════════════════════════ -->
   <script>
+  /* ═══════════════════════════════════════════════════════════ */
+  /* CINEMATIC INTRO — runs before main IIFE                     */
+  /* ═══════════════════════════════════════════════════════════ */
+  (function () {
+    'use strict';
+
+    const CONCRETE = 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=1920&q=90';
+    const REDUCED  = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ── Reduced-motion: skip to final state ── */
+    if (REDUCED) {
+      document.getElementById('intro').style.display = 'none';
+      const heroBg = document.getElementById('hero-bg');
+      if (heroBg) heroBg.style.backgroundImage = `url('${CONCRETE}')`;
+      document.querySelectorAll('.o-breathe').forEach(el => {
+        el.style.animationPlayState = 'running';
+      });
+      window.__introActive = false;
+      return;
+    }
+
+    /* ── Lock scroll (Lenis not yet initialised; body overflow suffices) ── */
+    document.body.style.overflow = 'hidden';
+    window.__introActive = true;
+    window.__onIntroComplete = null; // filled by main IIFE
+
+    /* ── Build title letter-spans ── */
+    const TITLE = 'ATELIER MØRK';
+    const titleEl = document.getElementById('intro-title');
+    let lettersHTML = '';
+    for (const ch of TITLE) {
+      if (ch === ' ') {
+        lettersHTML += `<span class="intro-space" aria-hidden="true"></span>`;
+      } else if (ch === 'Ø') {
+        lettersHTML += `<span class="intro-letter o-breathe" aria-hidden="true">${ch}</span>`;
+      } else {
+        lettersHTML += `<span class="intro-letter" aria-hidden="true">${ch}</span>`;
+      }
+    }
+    titleEl.innerHTML = lettersHTML;
+
+    /* ── Live clock inside intro ── */
+    function pad(n) { return String(n).padStart(2, '0'); }
+    function tickIntro() {
+      const now = new Date();
+      const el = document.getElementById('intro-clock');
+      if (el) el.textContent =
+        `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    }
+    tickIntro();
+    const introClockId = setInterval(tickIntro, 1000);
+
+    /* ── Easing constants ── */
+    const E_MAIN   = 'cubic-bezier(0.65, 0, 0.35, 1)';
+    const E_LETTER = 'cubic-bezier(0.16, 1, 0.3, 1)';
+
+    /* ── Set GSAP initial state for facade ── */
+    gsap.set('#intro-facade', {
+      xPercent: -50,
+      yPercent: -50,
+      clipPath: 'inset(49.9% 0% 49.9% 0%)',
+      rotateY: 0,
+    });
+    gsap.set(['#intro-concrete-img', '#intro-fg-gradient'], { opacity: 0 });
+    gsap.set('.intro-letter', { opacity: 0, y: 40 });
+
+    /* ═══════════════════════════════════════
+       MASTER TIMELINE
+    ═══════════════════════════════════════ */
+    const tl = gsap.timeline({
+      onComplete() {
+        clearInterval(introClockId);
+
+        /* Apply concrete bg to hero so the crossfade is seamless */
+        const heroBg = document.getElementById('hero-bg');
+        if (heroBg) heroBg.style.backgroundImage = `url('${CONCRETE}')`;
+
+        /* Start Ø breathing on both intro and hero */
+        document.querySelectorAll('.o-breathe').forEach(el => {
+          el.style.animationPlayState = 'running';
+        });
+
+        /* Ken-burns: slow scale on concrete img  */
+        gsap.fromTo('#intro-concrete-img',
+          { scale: 1.0 },
+          { scale: 1.06, duration: 24, ease: 'none', repeat: -1, yoyo: true }
+        );
+
+        /* Release Lenis (main IIFE sets the callback) */
+        document.body.style.overflow = '';
+        window.__introActive = false;
+        if (typeof window.__onIntroComplete === 'function') {
+          window.__onIntroComplete();
+        }
+
+        /* Dismiss intro on first intentional scroll */
+        let dismissed = false;
+        function dismissIntro() {
+          if (dismissed) return;
+          dismissed = true;
+          gsap.to('#intro', {
+            opacity: 0,
+            duration: 0.55,
+            ease: 'power2.out',
+            onComplete() {
+              const el = document.getElementById('intro');
+              if (el) el.style.display = 'none';
+              /* Ensure ScrollTrigger recalculates after overlay gone */
+              if (window.ScrollTrigger) window.ScrollTrigger.refresh();
+            }
+          });
+        }
+        window.addEventListener('wheel',      dismissIntro, { once: true, passive: true });
+        window.addEventListener('touchstart', dismissIntro, { once: true, passive: true });
+        window.addEventListener('keydown',    dismissIntro, { once: true });
+      }
+    });
+
+    /* ─── Phase 1 · 0.0–1.0s — Hairline draws ──────────── */
+    tl
+      .fromTo('#intro-line',
+        { scaleX: 0 },
+        { scaleX: 1, duration: 1.0, ease: 'power2.inOut' },
+        0
+      )
+      .fromTo('#intro-est',
+        { opacity: 0, y: 5 },
+        { opacity: 1, y: 0, duration: 0.48, ease: E_LETTER },
+        0.4
+      )
+
+    /* ─── Phase 2 · 1.0–2.45s — Facade unfolds + HOLDS ─── */
+      /* fade line + label out in tandem with facade start */
+      .to('#intro-line',
+        { opacity: 0, duration: 0.18 },
+        1.0
+      )
+      .to('#intro-est',
+        { opacity: 0, duration: 0.18 },
+        1.0
+      )
+      /* facade unfolds: clipPath 49.9% → 0%, simultaneous rotateY 18° */
+      .fromTo('#intro-facade',
+        { clipPath: 'inset(49.9% 0% 49.9% 0%)', rotateY: 0, opacity: 1 },
+        { clipPath: 'inset(0% 0% 0% 0%)',        rotateY: 18, duration: 1.0, ease: E_MAIN },
+        1.08
+      )
+      /* ← holds at rotateY(18°) until 2.45s: ~0.37s intentional beat */
+
+    /* ─── Phase 3 · 2.45–3.7s — Concrete fades in, un-rotates ── */
+      .to('#intro-facade',
+        { rotateY: 0, duration: 0.9, ease: E_MAIN },
+        2.45
+      )
+      .to('#intro-concrete-img',
+        { opacity: 1, duration: 0.85, ease: 'power1.inOut' },
+        2.45
+      )
+      /* border dissolves before scale */
+      .to('#intro-facade',
+        { borderColor: 'rgba(255,255,255,0)', duration: 0.35 },
+        3.1
+      )
+
+    /* ─── Phase 4 · 3.7–5.0s — Plate covers viewport ──────── */
+      .to('#intro-facade',
+        { scale: 3.2, duration: 1.3, ease: 'power2.inOut' },
+        3.65
+      )
+      .to('#intro-fg-gradient',
+        { opacity: 1, duration: 0.65, ease: 'power1.out' },
+        4.15
+      )
+
+    /* ─── Phase 5 · 5.0–6.0s — Title types in ──────────────── */
+      .to('#intro-topbar',
+        { opacity: 1, duration: 0.52, ease: E_MAIN },
+        5.0
+      )
+      .fromTo('.intro-letter',
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.52,
+          stagger: { each: 0.058, ease: 'none' },
+          ease: E_LETTER,
+        },
+        5.0
+      )
+      .to('#intro-category',
+        { opacity: 1, duration: 0.52, ease: E_MAIN },
+        5.6
+      );
+
+  })();
+
+  /* ═══════════════════════════════════════════════════════════ */
+  /* MAIN PAGE SCRIPT                                            */
+  /* ═══════════════════════════════════════════════════════════ */
   (function () {
     'use strict';
 
@@ -863,6 +1275,14 @@
     const lenis = new Lenis({ lerp: 0.08, smoothWheel: true });
     function rafLoop(time) { lenis.raf(time); requestAnimationFrame(rafLoop); }
     requestAnimationFrame(rafLoop);
+
+    /* ── Pause Lenis while intro is active ── */
+    if (window.__introActive) {
+      lenis.stop();
+      window.__onIntroComplete = function () {
+        lenis.start();
+      };
+    }
 
     /* ── GSAP register ── */
     gsap.registerPlugin(ScrollTrigger);
