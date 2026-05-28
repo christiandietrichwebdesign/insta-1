@@ -5,63 +5,93 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ATELIER MØRK — Architektur & Materialforschung, Bayreuth</title>
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,300;0,9..144,400;0,9..144,700;1,9..144,200;1,9..144,300;1,9..144,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200;0,9..144,300;0,9..144,400;1,9..144,200;1,9..144,300&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&display=swap" rel="stylesheet">
 
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- GSAP -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-
-  <!-- Lenis -->
   <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"></script>
 
   <style>
     :root {
-      --bone: #F4F1EC;
-      --ink: #0A0A0A;
-      --sienna: #8B3A1F;
-      --ease-main: cubic-bezier(0.65, 0, 0.35, 1);
-      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+      --bone:      #F4F1EC;
+      --bone-deep: #EFEBE3;
+      --ink:       #0A0A0A;
+      --sienna:    #8B3A1F;
+      --ee:  cubic-bezier(0.65, 0, 0.35, 1);
+      --ex:  cubic-bezier(0.7,  0, 0.84, 0);
+      --eo:  cubic-bezier(0.16, 1, 0.3,  1);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     html { scroll-behavior: auto; }
 
     body {
       background: var(--ink);
       color: var(--ink);
-      font-family: 'Geist', 'Inter', system-ui, -apple-system, sans-serif;
+      font-family: 'Geist', system-ui, sans-serif;
       font-size: 17px;
       line-height: 1.6;
       overflow-x: hidden;
       cursor: none;
     }
 
-    /* ── Custom cursor ── */
+    /* ── CURSOR ── */
     #cursor {
       position: fixed;
-      width: 10px;
-      height: 10px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
-      background: #ffffff;
+      background: #fff;
       mix-blend-mode: difference;
       pointer-events: none;
-      z-index: 9999;
+      z-index: 9000;
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 0;
+      transition: transform 500ms var(--eo), opacity 200ms var(--ee);
+      will-change: transform, left, top;
+    }
+    #cursor.visible { opacity: 1; }
+
+    #cursor-label {
+      position: fixed;
+      width: 80px;
+      height: 80px;
+      pointer-events: none;
+      z-index: 9001;
       transform: translate(-50%, -50%);
       opacity: 0;
-      transition: opacity 250ms var(--ease-main), transform 80ms linear;
+      transition: opacity 300ms var(--eo);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    #cursor.active { opacity: 1; }
-    #cursor.large { transform: translate(-50%, -50%) scale(4); }
+    #cursor-label.visible { opacity: 1; }
+    #cursor-label-inner {
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--ink);
+      white-space: nowrap;
+    }
+    #cursor-label.spinning #cursor-label-inner {
+      animation: label-spin 8s linear infinite;
+    }
+    @keyframes label-spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
 
-    /* ── Typography ── */
+    @media (pointer: coarse) {
+      body { cursor: auto; }
+      #cursor, #cursor-label { display: none !important; }
+    }
+
+    /* ── TYPOGRAPHY ── */
     .font-display { font-family: 'Fraunces', Georgia, serif; }
     .eyebrow {
       font-size: 11px;
@@ -70,45 +100,100 @@
       font-weight: 400;
     }
 
-    /* ── Hero ── */
+    /* ── SECTION EYEBROWS ── */
+    .sec-ey-wrap {
+      overflow: hidden;
+      display: block;
+      line-height: 0.9;
+    }
+    .sec-ey {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: clamp(3.5rem, 8vw, 9.5rem);
+      font-weight: 300;
+      letter-spacing: -0.03em;
+      line-height: 0.9;
+      display: block;
+    }
+    .ey-ch {
+      display: inline-block;
+      transform: translateY(108%);
+      will-change: transform;
+    }
+    .ey-sp { display: inline-block; width: 0.25em; }
+
+    /* ── HERO ── */
     #hero-zone {
-      height: 200vh;
+      height: 220vh;
       position: relative;
     }
     #hero {
       position: sticky;
       top: 0;
       height: 100vh;
-      background: var(--ink);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
       overflow: hidden;
-      z-index: 1;
-    }
-    #hero-topbar {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      padding: 32px 48px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: center;
+      background: var(--ink);
+    }
+
+    #hero-photo {
+      position: absolute;
+      inset: 0;
+      background-image: url('https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=1920&q=90');
+      background-size: cover;
+      background-position: center 40%;
+      will-change: transform, opacity;
+    }
+    #hero-photo-mask {
+      position: absolute;
+      inset: 0;
+      background: var(--ink);
+      z-index: 1;
+      will-change: opacity;
+    }
+    #hero-grad {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom,
+        rgba(10,10,10,0.55) 0%,
+        rgba(10,10,10,0)    55%);
+      z-index: 2;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #hero-title-wrap {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 3;
+      will-change: transform;
     }
     #hero-title {
       font-family: 'Fraunces', Georgia, serif;
-      font-size: clamp(100px, 20vw, 340px);
+      font-size: clamp(7rem, 20vw, 26rem);
       font-weight: 300;
-      letter-spacing: -0.04em;
-      line-height: 0.88;
-      color: var(--bone);
-      padding: 0 48px;
+      letter-spacing: -0.05em;
+      line-height: 0.85;
+      white-space: nowrap;
       user-select: none;
+      /* Photo shows through letters */
+      background-image: url('https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=1920&q=90');
+      background-size: 100vw 100vh;
+      background-position: center 40%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+      will-change: transform;
     }
+
     .o-breathe {
       display: inline-block;
-      animation: breathe 4s var(--ease-main) infinite;
+      animation: breathe 4s var(--ee) infinite;
       transform-origin: center;
     }
     @keyframes breathe {
@@ -116,21 +201,29 @@
       50%       { transform: scale(1.04); }
     }
 
-    /* ── White overlay (inversion wipe) ── */
-    #white-wipe {
-      position: fixed;
-      inset: 0;
-      background: var(--bone);
-      z-index: 5;
-      clip-path: inset(100% 0 0 0);
-      pointer-events: none;
+    #hero-topbar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      padding: 32px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 4;
+    }
+    #hero-bottom {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 0 48px 40px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      z-index: 4;
     }
 
-    /* ── Nav mark (appears after inversion) ── */
+    /* ── NAV MARK ── */
     #nav-mark {
       position: fixed;
-      top: 36px;
-      left: 48px;
+      top: 36px; left: 48px;
       z-index: 50;
       opacity: 0;
       font-family: 'Fraunces', Georgia, serif;
@@ -141,26 +234,31 @@
       pointer-events: none;
     }
 
-    /* ── Main white content ── */
+    /* ── WHITE WIPE ── */
+    #white-wipe {
+      position: fixed;
+      inset: 0;
+      background: var(--bone);
+      z-index: 5;
+      clip-path: inset(100% 0 0 0);
+      pointer-events: none;
+    }
+
+    /* ── MAIN CONTENT ── */
     #main-content {
       background: var(--bone);
       position: relative;
       z-index: 10;
     }
 
-    /* ── Section shared ── */
-    .section-pad { padding: 120px 48px; }
-    .section-pad-lg { padding: 160px 48px; }
-
-    /* ── Manifesto ── */
-    #manifesto { max-width: 860px; }
+    /* ── MANIFESTO ── */
     #manifesto-text {
       font-family: 'Fraunces', Georgia, serif;
-      font-size: clamp(22px, 2.4vw, 36px);
+      font-size: clamp(20px, 2.2vw, 34px);
       font-weight: 300;
-      line-height: 1.5;
+      line-height: 1.55;
       letter-spacing: -0.01em;
-      max-width: 65ch;
+      max-width: 62ch;
     }
     .word {
       display: inline-block;
@@ -172,61 +270,59 @@
       vertical-align: middle;
       margin: 0 6px;
       position: relative;
-      top: -3px;
+      top: -2px;
     }
 
-    /* ── Project Index ── */
-    #projects { border-top: 1px solid rgba(10,10,10,0.12); }
+    /* ── PROJECT INDEX ── */
+    #project-list { border-top: 1px solid rgba(10,10,10,0.12); }
     .project-row {
       display: flex;
       align-items: baseline;
       justify-content: space-between;
-      padding: 28px 0;
-      border-bottom: 1px solid rgba(10,10,10,0.12);
+      padding: 26px 0;
+      border-bottom: 1px solid rgba(10,10,10,0.10);
       cursor: none;
       position: relative;
-      overflow: hidden;
     }
-    .project-row::after {
-      content: '';
+    .proj-underline {
       position: absolute;
-      bottom: -1px;
-      left: 0;
-      width: 100%;
-      height: 1px;
+      bottom: -1px; left: 0;
+      width: 100%; height: 1px;
       background: var(--ink);
       transform: scaleX(0);
       transform-origin: left;
-      transition: transform 600ms var(--ease-main);
+      transition: transform 600ms var(--ee);
     }
-    .project-row:hover::after { transform: scaleX(1); }
+    .project-row:hover .proj-underline { transform: scaleX(1); }
     .project-name {
       font-family: 'Fraunces', Georgia, serif;
-      font-size: clamp(28px, 3.8vw, 58px);
+      font-size: clamp(26px, 3.6vw, 56px);
       font-weight: 300;
       letter-spacing: -0.02em;
       line-height: 1;
-      transition: transform 400ms var(--ease-main);
+      transition: transform 400ms var(--ee);
     }
     .project-row:hover .project-name { transform: translateX(8px); }
     .project-year {
-      font-size: 13px;
+      font-size: 12px;
       letter-spacing: 0.12em;
-      opacity: 0.45;
-      font-weight: 400;
+      opacity: 0.4;
     }
 
-    /* ── Project Thumbnail Follower ── */
+    /* SVG filters */
+    #svg-filters { position: absolute; width: 0; height: 0; overflow: hidden; pointer-events: none; }
+
+    /* Thumbnail follower */
     #project-thumb {
       position: fixed;
-      width: 260px;
-      height: 174px;
+      width: 280px;
+      height: 186px;
       pointer-events: none;
-      z-index: 100;
+      z-index: 200;
       opacity: 0;
       transform: translate(-50%, -50%);
-      transition: opacity 300ms var(--ease-main);
-      overflow: hidden;
+      overflow: visible;
+      will-change: left, top;
     }
     #project-thumb img {
       width: 100%;
@@ -235,114 +331,146 @@
       display: block;
     }
 
-    /* ── Featured Project (Horizontal Scroll) ── */
-    #featured {
-      background: var(--ink);
-    }
+    /* ── FEATURED ── */
+    #featured { background: var(--ink); }
+    #featured-ey-zone { padding: 100px 48px 56px; }
+
     #featured-sticky {
       height: 100vh;
       overflow: hidden;
       display: flex;
       align-items: center;
+      position: relative;
     }
-    #featured-track {
+    #featured-inner {
       display: flex;
       align-items: center;
-      gap: 80px;
-      padding: 0 80px;
-      will-change: transform;
+      height: 100%;
+      width: 100%;
     }
-    #featured-track .feat-intro {
+    #featured-intro {
       flex-shrink: 0;
       width: 400px;
+      padding: 0 48px 0 80px;
     }
-    #featured-track .feat-image {
+    #featured-panorama {
       flex-shrink: 0;
-      width: 1200px;
-      height: 72vh;
-      overflow: hidden;
+      width: 3840px;
+      height: 80vh;
       position: relative;
-    }
-    #featured-track .feat-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .feat-annotation {
-      position: absolute;
-      color: var(--bone);
-      opacity: 0;
-      transform: translateY(12px);
-      transition: opacity 500ms var(--ease-main), transform 500ms var(--ease-main);
-      max-width: 240px;
-    }
-    .feat-annotation.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    .feat-ann-1 { top: 24px; left: 40px; }
-    .feat-ann-2 { top: 44%; left: 42%; transform: translateX(-50%) translateY(12px); }
-    .feat-ann-2.visible { transform: translateX(-50%) translateY(0); }
-    .feat-ann-3 { bottom: 40px; right: 40px; text-align: right; }
-
-    /* ── Materials ── */
-    #materials { background: var(--bone); }
-    .materials-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0;
-    }
-    .material-item {
-      position: relative;
-      overflow: hidden;
-      height: 55vh;
-      cursor: none;
-    }
-    .material-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 900ms var(--ease-main);
       will-change: transform;
     }
-    .material-item:hover img { transform: scale(1.08); }
-    .material-label {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 24px 28px;
-      background: linear-gradient(transparent, rgba(10,10,10,0.7));
-    }
-    .material-label .mat-name {
-      font-family: 'Fraunces', Georgia, serif;
-      font-size: 22px;
-      font-weight: 300;
-      letter-spacing: 0.08em;
-      color: var(--bone);
+    #featured-panorama img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
       display: block;
-      transform: translateY(28px);
-      opacity: 0;
-      transition: transform 500ms var(--ease-main), opacity 500ms var(--ease-main);
     }
-    .material-label .mat-sub {
+
+    .feat-cap {
+      position: absolute;
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: clamp(2rem, 4.5vw, 5rem);
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      color: var(--bone);
+      mix-blend-mode: difference;
+      pointer-events: none;
+      white-space: nowrap;
+      will-change: transform, opacity;
+    }
+
+    #feat-progress {
+      position: absolute;
+      bottom: 36px; left: 0; right: 0;
+      padding: 0 80px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      z-index: 10;
+    }
+    #feat-prog-bar {
+      flex: 1;
+      height: 1px;
+      background: rgba(244,241,236,0.12);
+      position: relative;
+      overflow: hidden;
+    }
+    #feat-prog-fill {
+      position: absolute;
+      top: 0; left: 0;
+      height: 100%;
+      background: rgba(244,241,236,0.6);
+      width: 0%;
+    }
+    #feat-prog-label {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(244,241,236,0.35);
+      white-space: nowrap;
+    }
+
+    /* ── MATERIALS pinned sequence ── */
+    #materials { background: var(--ink); }
+    #materials-ey-zone { padding: 100px 48px 56px; }
+    #materials-sticky {
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+    .mat-panel {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: flex-end;
+    }
+    .mat-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      will-change: transform;
+    }
+    .mat-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top,
+        rgba(10,10,10,0.78) 0%,
+        rgba(10,10,10,0.08) 55%,
+        transparent 100%);
+    }
+    .mat-content {
+      position: relative;
+      z-index: 2;
+      padding: 0 72px 68px;
+      width: 100%;
+    }
+    .mat-name {
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: clamp(5rem, 13vw, 15rem);
+      font-weight: 300;
+      letter-spacing: -0.04em;
+      line-height: 0.85;
+      color: var(--bone);
+    }
+    .mat-spec {
       font-size: 11px;
       letter-spacing: 0.16em;
       text-transform: uppercase;
-      color: rgba(244,241,236,0.6);
-      display: block;
-      margin-top: 4px;
-      transform: translateY(28px);
-      opacity: 0;
-      transition: transform 500ms 60ms var(--ease-main), opacity 500ms 60ms var(--ease-main);
+      color: rgba(244,241,236,0.4);
+      margin-top: 20px;
     }
-    .material-item:hover .mat-name,
-    .material-item:hover .mat-sub {
-      transform: translateY(0);
-      opacity: 1;
+    #mat-slab {
+      position: absolute;
+      inset: 0;
+      background: var(--ink);
+      z-index: 20;
+      transform: translateX(-100%);
+      pointer-events: none;
     }
 
-    /* ── Prozess ── */
+    /* ── PROZESS ── */
     #prozess { background: var(--bone); }
     .prozess-item {
       display: grid;
@@ -358,12 +486,12 @@
       font-size: 11px;
       letter-spacing: 0.18em;
       text-transform: uppercase;
-      opacity: 0.35;
+      opacity: 0.32;
       padding-top: 6px;
     }
     .prozess-title {
       font-family: 'Fraunces', Georgia, serif;
-      font-size: clamp(24px, 2.4vw, 36px);
+      font-size: clamp(22px, 2.2vw, 34px);
       font-weight: 300;
       letter-spacing: -0.01em;
       margin-bottom: 12px;
@@ -372,421 +500,226 @@
     .prozess-text {
       font-size: 15px;
       line-height: 1.65;
-      opacity: 0.65;
-      max-width: 55ch;
+      opacity: 0.6;
+      max-width: 52ch;
     }
 
-    /* ── Awards Marquee ── */
+    /* ── MARQUEE ── */
     #awards {
       background: var(--ink);
       overflow: hidden;
-      border-top: 1px solid rgba(244,241,236,0.08);
-      border-bottom: 1px solid rgba(244,241,236,0.08);
+    }
+    #awards-ey-zone {
+      padding: 100px 48px 56px;
+      border-top: 1px solid rgba(244,241,236,0.06);
     }
     .marquee-outer {
       display: flex;
       overflow: hidden;
-      padding: 28px 0;
+      padding: 32px 0 40px;
+      border-top: 1px solid rgba(244,241,236,0.06);
+      border-bottom: 1px solid rgba(244,241,236,0.06);
     }
     .marquee-track {
       display: flex;
-      gap: 0;
       animation: marquee 22s linear infinite;
       white-space: nowrap;
       flex-shrink: 0;
+      will-change: transform;
     }
     .marquee-item {
       font-family: 'Fraunces', Georgia, serif;
-      font-size: clamp(18px, 2vw, 26px);
+      font-size: clamp(18px, 1.9vw, 26px);
       font-weight: 300;
-      color: rgba(244,241,236,0.55);
-      padding: 0 64px;
+      color: rgba(244,241,236,0.5);
+      padding: 0 60px;
       letter-spacing: 0.02em;
     }
-    .marquee-item span {
+    .m-dot {
       display: inline-block;
       vertical-align: middle;
-      width: 4px;
-      height: 4px;
+      width: 4px; height: 4px;
       border-radius: 50%;
-      background: rgba(244,241,236,0.25);
-      margin-right: 64px;
+      background: rgba(244,241,236,0.22);
+      margin-right: 60px;
     }
     @keyframes marquee {
       from { transform: translateX(0); }
       to   { transform: translateX(-50%); }
     }
 
-    /* ── Kontakt ── */
+    /* ── KONTAKT ── */
     #kontakt {
-      background: var(--ink);
+      background: var(--bone-deep);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: 80px 48px;
+      padding: 100px 48px 80px;
       position: relative;
     }
-    .kontakt-kicker {
-      color: rgba(244,241,236,0.35);
-      margin-bottom: 40px;
+    #kontakt-ey-zone { margin-bottom: 60px; }
+    .kl-wrap {
+      overflow: hidden;
+      display: block;
+    }
+    .kl {
+      display: block;
+      transform: translateY(102%);
+      will-change: transform;
     }
     #kontakt-headline {
       font-family: 'Fraunces', Georgia, serif;
-      font-size: clamp(52px, 7.2vw, 122px);
+      font-size: clamp(48px, 6.8vw, 116px);
       font-weight: 300;
       letter-spacing: -0.03em;
       line-height: 0.92;
-      color: var(--bone);
+      color: var(--ink);
       max-width: 18ch;
     }
     .kontakt-link {
       display: inline-block;
       margin-top: 64px;
-      font-size: 13px;
+      font-size: 12px;
       letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: rgba(244,241,236,0.5);
+      color: rgba(10,10,10,0.45);
       text-decoration: none;
-      border-bottom: 1px solid rgba(244,241,236,0.2);
+      border-bottom: 1px solid rgba(10,10,10,0.18);
       padding-bottom: 4px;
-      transition: color 300ms var(--ease-main), border-color 300ms var(--ease-main);
+      transition: color 300ms var(--ee), border-color 300ms var(--ee);
+      cursor: none;
     }
-    .kontakt-link:hover { color: var(--bone); border-color: var(--bone); }
+    .kontakt-link:hover { color: var(--ink); border-color: var(--ink); }
 
-    /* ── Footer ── */
+    /* ── FOOTER ── */
     #footer {
       background: var(--ink);
-      border-top: 1px solid rgba(244,241,236,0.08);
+      border-top: 1px solid rgba(244,241,236,0.07);
       padding: 56px 48px;
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
       gap: 40px;
       align-items: end;
     }
-    #footer .f-label {
+    .f-label {
       font-size: 11px;
       letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: rgba(244,241,236,0.25);
+      color: rgba(244,241,236,0.22);
       margin-bottom: 12px;
     }
-    #footer .f-val {
+    .f-val {
       font-size: 14px;
-      color: rgba(244,241,236,0.55);
+      color: rgba(244,241,236,0.5);
       line-height: 1.8;
     }
-    #footer .f-socials a {
+    .f-socials a {
       display: block;
-      font-size: 13px;
+      font-size: 12px;
       letter-spacing: 0.12em;
-      color: rgba(244,241,236,0.4);
+      color: rgba(244,241,236,0.36);
       text-decoration: none;
       margin-bottom: 6px;
       cursor: none;
+      transition: color 250ms var(--ee);
     }
+    .f-socials a:hover { color: rgba(244,241,236,0.75); }
     .footer-mark {
       font-family: 'Fraunces', Georgia, serif;
       font-size: 13px;
       font-weight: 300;
       letter-spacing: 0.06em;
-      color: rgba(244,241,236,0.2);
+      color: rgba(244,241,236,0.18);
     }
 
-    /* ── Reduced motion ── */
-    @media (prefers-reduced-motion: reduce) {
-      .o-breathe { animation: none; }
-      .marquee-track { animation: none; }
-      .word {
-        opacity: 1 !important;
-        transform: none !important;
-        transition: none !important;
-      }
-    }
-
-    /* ── Scrollbar ── */
+    /* ── SCROLLBAR ── */
     ::-webkit-scrollbar { width: 0; }
 
-    /* ═══════════════════════════════════════════════ */
-    /* CINEMATIC INTRO                                 */
-    /* ═══════════════════════════════════════════════ */
-
-    /* Pause breathing until intro timeline fires it */
-    .o-breathe { animation-play-state: paused; }
-
-    /* Hero bg layers — populated by JS post-intro */
-    #hero-bg {
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-    }
-    #hero-bg-gradient {
-      position: absolute;
-      inset: 0;
-      z-index: 1;
-      background: linear-gradient(to bottom,
-        rgba(10,10,10,0.84) 0%,
-        rgba(10,10,10,0.0) 44%);
-      pointer-events: none;
-    }
-    #hero-topbar    { z-index: 2; }
-    #hero-title     { position: relative; z-index: 2; }
-    .hero-cat-line  { position: relative; z-index: 2; }
-
-    /* Intro overlay — full-screen cover */
-    #intro {
-      position: fixed;
-      inset: 0;
-      z-index: 200;
-      background: var(--ink);
-      overflow: hidden;
-    }
-
-    /* Phase 1 — horizontal hairline */
-    #intro-line {
-      position: absolute;
-      top: calc(50% - 0.5px);
-      left: 15vw;
-      width: 70vw;
-      height: 1px;
-      background: rgba(255,255,255,0.8);
-      transform-origin: 50% 50%;
-      transform: scaleX(0);
-    }
-
-    /* Phase 1 — establishment label */
-    #intro-est {
-      position: absolute;
-      top: calc(50% + 14px);
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 11px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.38);
-      white-space: nowrap;
-      opacity: 0;
-    }
-
-    /* Phase 2 — facade (perspective wrapper + bordered box) */
-    #intro-facade-wrap {
-      position: absolute;
-      inset: 0;
-      perspective: 2000px;
-      pointer-events: none;
-    }
-    #intro-facade {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: calc(50vh * 1.3333);
-      height: 50vh;
-      border: 1px solid rgba(255,255,255,0.68);
-      overflow: hidden;
-      /* All transforms owned by GSAP */
-    }
-
-    /* Phase 3 — concrete image inside facade */
-    #intro-concrete-img {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center 40%;
-      opacity: 0;
-      display: block;
-    }
-
-    /* Phase 3–4 — gradient inside facade / covering bg */
-    #intro-fg-gradient {
-      position: absolute;
-      inset: 0;
-      z-index: 1;
-      background: linear-gradient(to bottom,
-        rgba(10,10,10,0.86) 0%,
-        rgba(10,10,10,0.0) 42%);
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    /* Phase 5 — title + UI elements */
-    #intro-title-wrap {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 0 48px;
-      z-index: 2;
-      pointer-events: none;
-    }
-    #intro-title {
-      font-family: 'Fraunces', Georgia, serif;
-      font-size: clamp(100px, 20vw, 340px);
-      font-weight: 300;
-      letter-spacing: -0.04em;
-      line-height: 0.88;
-      color: rgba(255,255,255,0.96);
-      user-select: none;
-    }
-    .intro-letter {
-      display: inline-block;
-      opacity: 0;
-      /* initial y set by GSAP */
-    }
-    .intro-space {
-      display: inline-block;
-      width: 0.28em;
-    }
-    #intro-topbar {
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      padding: 32px 48px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 3;
-      opacity: 0;
-    }
-    #intro-category {
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      padding: 0 48px 36px;
-      display: flex;
-      align-items: center;
-      gap: 24px;
-      z-index: 3;
-      opacity: 0;
-    }
-
-    /* Reduced motion: skip intro entirely */
+    /* ── REDUCED MOTION ── */
     @media (prefers-reduced-motion: reduce) {
-      #intro { display: none; }
-      .o-breathe { animation-play-state: running; }
+      .o-breathe        { animation: none !important; }
+      .marquee-track    { animation: none !important; }
+      .word             { opacity: 1 !important; transform: none !important; }
+      .ey-ch            { transform: none !important; }
+      .kl               { transform: none !important; }
+      .prozess-item     { opacity: 1 !important; transform: none !important; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ── Custom cursor ── -->
-  <div id="cursor"></div>
+  <!-- Hidden SVG turbulence filter -->
+  <svg id="svg-filters" aria-hidden="true">
+    <defs>
+      <filter id="turb-filter" x="-25%" y="-25%" width="150%" height="150%"
+              color-interpolation-filters="sRGB">
+        <feTurbulence id="turb-node" type="turbulence"
+          baseFrequency="0.012 0.012" numOctaves="4" seed="7" result="noise"/>
+        <feDisplacementMap id="disp-node" in="SourceGraphic" in2="noise"
+          scale="0" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+    </defs>
+  </svg>
 
-  <!-- ── Nav wordmark (appears after inversion) ── -->
-  <div id="nav-mark">ATELIER MØRK</div>
-
-  <!-- ── Project thumbnail follower ── -->
-  <div id="project-thumb">
-    <img src="" alt="Project preview" id="thumb-img">
+  <!-- Custom cursor -->
+  <div id="cursor" role="presentation"></div>
+  <div id="cursor-label" aria-hidden="true">
+    <span id="cursor-label-inner">VIEW —</span>
   </div>
 
-  <!-- ═══════════════════════════════════════════ -->
-  <!-- CINEMATIC INTRO (plays once on load)        -->
-  <!-- ═══════════════════════════════════════════ -->
-  <div id="intro" role="presentation" aria-hidden="true">
+  <!-- Fixed nav mark -->
+  <div id="nav-mark" aria-hidden="true">ATELIER MØRK</div>
 
-    <!-- Phase 1: hairline -->
-    <div id="intro-line"></div>
-
-    <!-- Phase 1: establishment label -->
-    <div id="intro-est">EST. 2019 · BAYREUTH · DE</div>
-
-    <!-- Phase 2–4: perspective facade / expanding plate -->
-    <div id="intro-facade-wrap">
-      <div id="intro-facade">
-        <img id="intro-concrete-img"
-             src="https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=1920&q=90"
-             alt=""
-             loading="eager"
-             fetchpriority="high">
-        <div id="intro-fg-gradient"></div>
-      </div>
-    </div>
-
-    <!-- Phase 5+: title and persistent UI -->
-    <div id="intro-title-wrap">
-      <div id="intro-topbar">
-        <span class="eyebrow" style="color:rgba(255,255,255,0.42); letter-spacing:0.18em;">
-          EST. 2019 · BAYREUTH · DE
-        </span>
-        <span class="eyebrow" style="color:rgba(255,255,255,0.42);" id="intro-clock">
-          00:00:00
-        </span>
-      </div>
-
-      <div id="intro-title" aria-label="Atelier Mørk">
-        <!-- letter spans built by JS -->
-      </div>
-
-      <div id="intro-category">
-        <span class="eyebrow" style="color:rgba(255,255,255,0.22);">Architektur</span>
-        <span style="width:40px; height:1px; background:rgba(255,255,255,0.14); display:inline-block;"></span>
-        <span class="eyebrow" style="color:rgba(255,255,255,0.22);">Materialforschung</span>
-      </div>
-    </div>
+  <!-- Thumbnail follower -->
+  <div id="project-thumb" aria-hidden="true">
+    <img id="thumb-img" src="" alt="">
   </div>
 
-  <!-- ═══════════════════════════════════════════ -->
-  <!-- §1 + §2: HERO + INVERSION                  -->
-  <!-- ═══════════════════════════════════════════ -->
+  <!-- ════════════════════════════════════════════ -->
+  <!-- HERO                                         -->
+  <!-- ════════════════════════════════════════════ -->
   <div id="hero-zone">
     <section id="hero">
-      <!-- Concrete bg layers (set by intro JS on completion) -->
-      <div id="hero-bg"></div>
-      <div id="hero-bg-gradient"></div>
+      <div id="hero-photo"></div>
+      <div id="hero-photo-mask"></div>
+      <div id="hero-grad"></div>
 
-      <!-- Top bar -->
       <div id="hero-topbar">
-        <span class="eyebrow" style="color:rgba(244,241,236,0.4); letter-spacing:0.18em;">
-          EST. 2019 · BAYREUTH · DE
-        </span>
-        <span class="eyebrow" style="color:rgba(244,241,236,0.4);" id="hero-time">
-          00:00:00
-        </span>
+        <span class="eyebrow" style="color:rgba(244,241,236,0.38);">EST. 2019 · BAYREUTH · DE</span>
+        <span class="eyebrow" style="color:rgba(244,241,236,0.38);" id="hero-time">00:00:00</span>
       </div>
 
-      <!-- Main title -->
-      <div id="hero-title" aria-label="Atelier Mørk">
-        ATELIER M<span class="o-breathe">Ø</span>RK
+      <div id="hero-title-wrap">
+        <div id="hero-title" aria-label="Atelier Mørk">ATELIER&nbsp;M<span class="o-breathe">Ø</span>RK</div>
       </div>
 
-      <!-- Subtle category line -->
-      <div class="hero-cat-line" style="padding: 28px 48px 0; display:flex; align-items:center; gap:24px;">
-        <span class="eyebrow" style="color:rgba(244,241,236,0.22);">Architektur</span>
-        <span style="width:40px; height:1px; background:rgba(244,241,236,0.15); display:inline-block;"></span>
-        <span class="eyebrow" style="color:rgba(244,241,236,0.22);">Materialforschung</span>
+      <div id="hero-bottom">
+        <span class="eyebrow" style="color:rgba(244,241,236,0.2);">Architektur</span>
+        <span style="width:36px;height:1px;background:rgba(244,241,236,0.12);display:inline-block;flex-shrink:0;"></span>
+        <span class="eyebrow" style="color:rgba(244,241,236,0.2);">Materialforschung</span>
       </div>
     </section>
   </div>
 
-  <!-- ── White wipe overlay ── -->
   <div id="white-wipe"></div>
 
-  <!-- ═══════════════════════════════════════════ -->
-  <!-- MAIN WHITE CONTENT (§3–§10)                -->
-  <!-- ═══════════════════════════════════════════ -->
+  <!-- ════════════════════════════════════════════ -->
+  <!-- MAIN CONTENT                                 -->
+  <!-- ════════════════════════════════════════════ -->
   <div id="main-content">
 
-    <!-- ── §3 MANIFESTO ── -->
-    <section class="section-pad-lg" style="padding-bottom:100px;">
-      <div id="manifesto" style="padding-top:40px;">
-        <p class="eyebrow" style="opacity:0; margin-bottom:48px; transform:translateY(10px);" id="manifesto-kicker">
-          Über uns
-        </p>
+    <!-- §1 MANIFEST -->
+    <section id="sec-manifest" style="padding: 100px 48px 120px;">
+      <div id="ey-zone-1" style="margin-bottom:72px;">
+        <div class="sec-ey-wrap">
+          <span class="sec-ey" id="ey-1" style="color:rgba(10,10,10,0.06);" aria-hidden="true">01 — MANIFEST</span>
+        </div>
+      </div>
+      <div style="max-width:860px;">
         <p id="manifesto-text">
-          <!-- Words split by JS -->
           Material ist Gedächtnis. Architektur ist Akt.
-          <span class="glyph-mark" aria-hidden="true">
-            <svg width="24" height="32" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2.5 C7 6, 3.5 12, 4.5 19 C5.5 25.5, 9.5 29.5, 12 29.5" stroke="#0A0A0A" stroke-width="1.2" stroke-linecap="round" fill="none"/>
-              <path d="M12 2.5 C17 6, 20.5 12, 19.5 19 C18.5 25.5, 14.5 29.5, 12 29.5" stroke="#0A0A0A" stroke-width="1.2" stroke-linecap="round" fill="none"/>
-              <path d="M5.5 16.5 L18.5 16.5" stroke="#0A0A0A" stroke-width="1" stroke-linecap="round"/>
-              <path d="M12 2.5 L12 29.5" stroke="#0A0A0A" stroke-width="0.6" stroke-linecap="round" opacity="0.4"/>
-            </svg>
-          </span>
+          <span class="glyph-mark" aria-hidden="true"><svg width="22" height="30" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.5 C7 6, 3.5 12, 4.5 19 C5.5 25.5, 9.5 29.5, 12 29.5" stroke="#0A0A0A" stroke-width="1.2" stroke-linecap="round" fill="none"/><path d="M12 2.5 C17 6, 20.5 12, 19.5 19 C18.5 25.5, 14.5 29.5, 12 29.5" stroke="#0A0A0A" stroke-width="1.2" stroke-linecap="round" fill="none"/><path d="M5.5 16.5 L18.5 16.5" stroke="#0A0A0A" stroke-width="1" stroke-linecap="round"/><path d="M12 2.5 L12 29.5" stroke="#0A0A0A" stroke-width="0.6" stroke-linecap="round" opacity="0.4"/></svg></span>
           Jedes Projekt entsteht aus einem Gespräch
           zwischen Beton und Licht, zwischen dem Dauerhaften
           und dem Vergänglichen. Wir entwerfen nicht für
@@ -796,227 +729,224 @@
       </div>
     </section>
 
-    <!-- ── §4 PROJECT INDEX ── -->
-    <section id="projects" class="section-pad" style="padding-top:0;">
-      <p class="eyebrow" style="opacity:0; margin-bottom:56px; padding-top:80px; border-top:1px solid rgba(10,10,10,0.10); transform:translateY(10px);" id="projects-kicker">Ausgewählte Arbeiten</p>
+    <!-- §2 ARBEITEN -->
+    <section id="sec-arbeiten" style="padding: 0 48px 140px;">
+      <div id="ey-zone-2" style="padding-top:80px; border-top:1px solid rgba(10,10,10,0.10); margin-bottom:56px;">
+        <div class="sec-ey-wrap">
+          <span class="sec-ey" id="ey-2" style="color:rgba(10,10,10,0.06);" aria-hidden="true">02 — ARBEITEN</span>
+        </div>
+      </div>
 
       <div id="project-list">
-        <div class="project-row"
-             data-img="https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=600&q=80">
+        <div class="project-row" data-img="https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=600&q=80">
           <span class="project-name">HAUS SOLITUDE</span>
+          <div class="proj-underline"></div>
           <span class="project-year">2024</span>
         </div>
-        <div class="project-row"
-             data-img="https://images.unsplash.com/photo-1464038008305-ee1e7c3c45d2?w=600&q=80">
+        <div class="project-row" data-img="https://images.unsplash.com/photo-1464038008305-ee1e7c3c45d2?w=600&q=80">
           <span class="project-name">WERKRAUM KULMBACH</span>
+          <div class="proj-underline"></div>
           <span class="project-year">2023</span>
         </div>
-        <div class="project-row"
-             data-img="https://images.unsplash.com/photo-1518005020951-eccb494ad742?w=600&q=80">
+        <div class="project-row" data-img="https://images.unsplash.com/photo-1518005020951-eccb494ad742?w=600&q=80">
           <span class="project-name">BRÜCKENHAUS MAIN</span>
+          <div class="proj-underline"></div>
           <span class="project-year">2023</span>
         </div>
-        <div class="project-row"
-             data-img="https://images.unsplash.com/photo-1510798831971-661eb04b3739?w=600&q=80">
+        <div class="project-row" data-img="https://images.unsplash.com/photo-1510798831971-661eb04b3739?w=600&q=80">
           <span class="project-name">PAVILION FRANKEN</span>
+          <div class="proj-underline"></div>
           <span class="project-year">2022</span>
         </div>
-        <div class="project-row"
-             data-img="https://images.unsplash.com/photo-1449157291145-7efd050a4d0e?w=600&q=80">
+        <div class="project-row" data-img="https://images.unsplash.com/photo-1449157291145-7efd050a4d0e?w=600&q=80">
           <span class="project-name">ATELIER NORD</span>
+          <div class="proj-underline"></div>
           <span class="project-year">2022</span>
         </div>
-        <div class="project-row"
-             data-img="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80">
+        <div class="project-row" data-img="https://images.unsplash.com/photo-1486325212027-8081e485255e?w=600&q=80">
           <span class="project-name">TURNHALLE REIMAGINED</span>
+          <div class="proj-underline"></div>
           <span class="project-year">2021</span>
         </div>
-        <div class="project-row"
-             data-img="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=600&q=80">
+        <div class="project-row" data-img="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=600&q=80">
           <span class="project-name">WOHNHAUS EREMITAGE</span>
+          <div class="proj-underline"></div>
           <span class="project-year">2020</span>
         </div>
       </div>
     </section>
 
-    <!-- ── §5 FEATURED PROJECT (Horizontal Pin) ── -->
+    <!-- §3 IM DETAIL (featured horizontal pin) -->
     <section id="featured">
-        <div id="featured-sticky">
-          <div id="featured-track">
+      <div id="featured-ey-zone">
+        <div class="sec-ey-wrap">
+          <span class="sec-ey" id="ey-3" style="color:rgba(244,241,236,0.05);" aria-hidden="true">03 — IM DETAIL</span>
+        </div>
+      </div>
 
-            <!-- Intro panel -->
-            <div class="feat-intro">
-              <p class="eyebrow" style="color:rgba(139,58,31,1); margin-bottom:28px;">
-                Projekt im Detail
-              </p>
-              <h2 class="font-display" style="font-size:clamp(36px,3.6vw,58px); font-weight:300; letter-spacing:-0.02em; color:var(--bone); line-height:1.1; margin-bottom:24px;">
-                Haus Solitude,<br>Bayreuth
-              </h2>
-              <p style="font-size:14px; color:rgba(244,241,236,0.45); line-height:1.7; max-width:38ch;">
-                Sichtbeton, Eichenholz, beschichteter Stahl.<br>
-                Fertigstellung 2024, 340 m².
-              </p>
-            </div>
+      <div id="featured-sticky">
+        <div id="featured-inner">
+          <!-- Intro panel -->
+          <div id="featured-intro">
+            <p class="eyebrow" style="color:var(--sienna); margin-bottom:28px;">Projekt im Detail</p>
+            <h2 class="font-display" style="font-size:clamp(28px,3vw,48px);font-weight:300;letter-spacing:-0.02em;color:var(--bone);line-height:1.1;margin-bottom:22px;">
+              Haus Solitude,<br>Bayreuth
+            </h2>
+            <p style="font-size:14px;color:rgba(244,241,236,0.4);line-height:1.75;max-width:30ch;">
+              Sichtbeton · Eichenholz<br>beschichteter Stahl<br>340 m² · 2024
+            </p>
+          </div>
 
-            <!-- Wide panorama -->
-            <div class="feat-image">
-              <img
-                src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=2400&q=80"
-                alt="Haus Solitude — Außenansicht Westfassade"
-                loading="lazy">
+          <!-- Panorama + captions -->
+          <div id="featured-panorama">
+            <img src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=3840&q=80"
+                 alt="Haus Solitude — Westfassade" loading="lazy">
 
-              <!-- Annotations -->
-              <div class="feat-annotation feat-ann-1" id="feat-ann-1">
-                <span class="eyebrow" style="color:rgba(244,241,236,0.45); font-size:10px; display:block; margin-bottom:6px;">Material</span>
-                <span style="font-family:'Fraunces',serif; font-size:16px; font-weight:300; color:var(--bone);">Sichtbeton C30/37, ungeschliffen, mit Holzbrettschalung.</span>
-              </div>
-
-              <div class="feat-annotation feat-ann-2" id="feat-ann-2">
-                <span class="eyebrow" style="color:rgba(244,241,236,0.45); font-size:10px; display:block; margin-bottom:6px;">Struktur</span>
-                <span style="font-family:'Fraunces',serif; font-size:16px; font-weight:300; color:var(--bone);">Tragendes Skelett aus warmgewalztem Stahl, sichtbar gelassen.</span>
-              </div>
-
-              <div class="feat-annotation feat-ann-3" id="feat-ann-3">
-                <span class="eyebrow" style="color:rgba(244,241,236,0.45); font-size:10px; display:block; margin-bottom:6px;">Öffnungen</span>
-                <span style="font-family:'Fraunces',serif; font-size:16px; font-weight:300; color:var(--bone);">Raumhohe Verglasungen nach Südwest, Lärcheholzrahmen.</span>
-              </div>
-            </div>
-
-            <!-- Trailing spacer -->
-            <div style="flex-shrink:0; width:200px;"></div>
+            <div class="feat-cap" id="fc-1" style="top:16%;left:6%;">SICHTBETON C30/37</div>
+            <div class="feat-cap" id="fc-2" style="bottom:26%;left:28%;">EICHE GEÖLT</div>
+            <div class="feat-cap" id="fc-3" style="top:20%;left:50%;">STAHL · WARMGEWALZT</div>
+            <div class="feat-cap" id="fc-4" style="bottom:18%;left:68%;">GLAS · ISOLIER</div>
+            <div class="feat-cap" id="fc-5" style="top:14%;right:4%;">340 m² · 2024</div>
           </div>
         </div>
+
+        <!-- Progress bar -->
+        <div id="feat-progress">
+          <div id="feat-prog-bar"><div id="feat-prog-fill"></div></div>
+          <span id="feat-prog-label">01/01 · HAUS SOLITUDE</span>
+        </div>
+      </div>
     </section>
 
-    <!-- ── §6 MATERIALS ── -->
+    <!-- §4 MATERIAL (pinned sequence) -->
     <section id="materials">
-      <div class="section-pad" style="padding-bottom:56px;">
-        <p class="eyebrow" style="opacity:0.35; margin-bottom:0;" id="materials-kicker">Materialien</p>
+      <div id="materials-ey-zone">
+        <div class="sec-ey-wrap">
+          <span class="sec-ey" id="ey-4" style="color:rgba(244,241,236,0.05);" aria-hidden="true">04 — MATERIAL</span>
+        </div>
       </div>
-      <div class="materials-grid">
-        <div class="material-item">
-          <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80"
-               alt="Beton — Rohbeton mit Schalung" loading="lazy">
-          <div class="material-label">
-            <span class="mat-name">Beton</span>
-            <span class="mat-sub">Sichtbeton · roh</span>
+
+      <div id="materials-sticky">
+        <!-- Panel 1: Beton -->
+        <div class="mat-panel" id="mat-1">
+          <div class="mat-bg" style="background-image:url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1920&q=80');"></div>
+          <div class="mat-overlay"></div>
+          <div class="mat-content">
+            <div class="mat-name">Beton</div>
+            <p class="mat-spec">Sichtbeton C30/37 · Holzbrettschalung · ungeschliffen</p>
           </div>
         </div>
-        <div class="material-item">
-          <img src="https://images.unsplash.com/photo-1541123437800-1bb1317badc2?w=800&q=80"
-               alt="Eiche — massives Eichenholz geölt" loading="lazy">
-          <div class="material-label">
-            <span class="mat-name">Eiche</span>
-            <span class="mat-sub">Massivholz · geölt</span>
+        <!-- Panel 2: Eiche -->
+        <div class="mat-panel" id="mat-2" style="opacity:0;">
+          <div class="mat-bg" style="background-image:url('https://images.unsplash.com/photo-1541123437800-1bb1317badc2?w=1920&q=80');"></div>
+          <div class="mat-overlay"></div>
+          <div class="mat-content">
+            <div class="mat-name">Eiche</div>
+            <p class="mat-spec">Massivholz · handgehobelt · geölt mit Naturleinöl</p>
           </div>
         </div>
-        <div class="material-item">
-          <img src="https://images.unsplash.com/photo-1518640467707-6e573d9dc43e?w=800&q=80"
-               alt="Stahl — warmgewalzter Baustahl" loading="lazy">
-          <div class="material-label">
-            <span class="mat-name">Stahl</span>
-            <span class="mat-sub">Warmgewalzt · roh</span>
+        <!-- Panel 3: Stahl -->
+        <div class="mat-panel" id="mat-3" style="opacity:0;">
+          <div class="mat-bg" style="background-image:url('https://images.unsplash.com/photo-1518640467707-6e573d9dc43e?w=1920&q=80');"></div>
+          <div class="mat-overlay"></div>
+          <div class="mat-content">
+            <div class="mat-name">Stahl</div>
+            <p class="mat-spec">Warmgewalzter Baustahl S355 · roh belassen · patiniert</p>
           </div>
         </div>
-        <div class="material-item">
-          <img src="https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=800&q=80"
-               alt="Glas — strukturelles Isolierglas" loading="lazy">
-          <div class="material-label">
-            <span class="mat-name">Glas</span>
-            <span class="mat-sub">Isolierverglasung · klar</span>
+        <!-- Panel 4: Glas -->
+        <div class="mat-panel" id="mat-4" style="opacity:0;">
+          <div class="mat-bg" style="background-image:url('https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=1920&q=80');"></div>
+          <div class="mat-overlay"></div>
+          <div class="mat-content">
+            <div class="mat-name">Glas</div>
+            <p class="mat-spec">Isolierverglasung VSG · 3-fach · Lärchenholzrahmen</p>
           </div>
         </div>
+        <div id="mat-slab"></div>
       </div>
     </section>
 
-    <!-- ── §7 PROZESS ── -->
-    <section id="prozess" class="section-pad">
-      <p class="eyebrow" style="opacity:0.35; margin-bottom:72px;" id="prozess-kicker">Arbeitsweise</p>
-
+    <!-- §5 PROZESS -->
+    <section id="prozess" style="padding: 100px 48px 140px;">
+      <div id="ey-zone-5" style="margin-bottom:80px;">
+        <div class="sec-ey-wrap">
+          <span class="sec-ey" id="ey-5" style="color:rgba(10,10,10,0.06);" aria-hidden="true">05 — PROZESS</span>
+        </div>
+      </div>
       <div class="prozess-item" id="pz-1">
         <span class="prozess-num">01</span>
-        <div>
-          <h3 class="prozess-title">Entwurf</h3>
-          <p class="prozess-text">Der erste Gedanke ist selten der letzte, aber immer der ehrlichste.</p>
-        </div>
+        <div><h3 class="prozess-title">Entwurf</h3><p class="prozess-text">Der erste Gedanke ist selten der letzte, aber immer der ehrlichste.</p></div>
       </div>
       <div class="prozess-item" id="pz-2">
         <span class="prozess-num">02</span>
-        <div>
-          <h3 class="prozess-title">Prüfung</h3>
-          <p class="prozess-text">Material und Tragwerk werden gemeinsam befragt, nicht nacheinander.</p>
-        </div>
+        <div><h3 class="prozess-title">Prüfung</h3><p class="prozess-text">Material und Tragwerk werden gemeinsam befragt, nicht nacheinander.</p></div>
       </div>
       <div class="prozess-item" id="pz-3">
         <span class="prozess-num">03</span>
-        <div>
-          <h3 class="prozess-title">Entwicklung</h3>
-          <p class="prozess-text">Details wachsen aus dem Ganzen heraus, nie umgekehrt.</p>
-        </div>
+        <div><h3 class="prozess-title">Entwicklung</h3><p class="prozess-text">Details wachsen aus dem Ganzen heraus, nie umgekehrt.</p></div>
       </div>
       <div class="prozess-item" id="pz-4">
         <span class="prozess-num">04</span>
-        <div>
-          <h3 class="prozess-title">Ausführung</h3>
-          <p class="prozess-text">Handwerk ist das Gespräch zwischen Zeichnung und Wirklichkeit.</p>
-        </div>
+        <div><h3 class="prozess-title">Ausführung</h3><p class="prozess-text">Handwerk ist das Gespräch zwischen Zeichnung und Wirklichkeit.</p></div>
       </div>
       <div class="prozess-item" id="pz-5" style="border-bottom:1px solid rgba(10,10,10,0.10);">
         <span class="prozess-num">05</span>
-        <div>
-          <h3 class="prozess-title">Übergabe</h3>
-          <p class="prozess-text">Ein Gebäude gehört erst dem Ort, wenn es ihn verändert hat.</p>
-        </div>
+        <div><h3 class="prozess-title">Übergabe</h3><p class="prozess-text">Ein Gebäude gehört erst dem Ort, wenn es ihn verändert hat.</p></div>
       </div>
     </section>
 
-    <!-- ── §8 AUSZEICHNUNGEN (Marquee) ── -->
+    <!-- §6 PRESSE -->
     <section id="awards">
-      <div class="marquee-outer" aria-label="Featured in">
-        <!-- Track A + Track B (duplicate for seamless loop) -->
+      <div id="awards-ey-zone">
+        <div class="sec-ey-wrap">
+          <span class="sec-ey" id="ey-6" style="color:rgba(244,241,236,0.05);" aria-hidden="true">06 — PRESSE</span>
+        </div>
+      </div>
+      <div class="marquee-outer" aria-label="Veröffentlicht in">
         <div class="marquee-track" aria-hidden="true">
-          <span class="marquee-item">Dezeen<span></span></span>
-          <span class="marquee-item">Wallpaper*<span></span></span>
-          <span class="marquee-item">AD Germany<span></span></span>
-          <span class="marquee-item">Detail<span></span></span>
-          <span class="marquee-item">Baumeister<span></span></span>
-          <span class="marquee-item">ArchDaily<span></span></span>
-          <span class="marquee-item">Domus<span></span></span>
-          <span class="marquee-item">Moderne Regional<span></span></span>
-          <!-- Duplicate -->
-          <span class="marquee-item">Dezeen<span></span></span>
-          <span class="marquee-item">Wallpaper*<span></span></span>
-          <span class="marquee-item">AD Germany<span></span></span>
-          <span class="marquee-item">Detail<span></span></span>
-          <span class="marquee-item">Baumeister<span></span></span>
-          <span class="marquee-item">ArchDaily<span></span></span>
-          <span class="marquee-item">Domus<span></span></span>
-          <span class="marquee-item">Moderne Regional<span></span></span>
+          <span class="marquee-item">Dezeen<span class="m-dot"></span></span>
+          <span class="marquee-item">Wallpaper*<span class="m-dot"></span></span>
+          <span class="marquee-item">AD Germany<span class="m-dot"></span></span>
+          <span class="marquee-item">Detail<span class="m-dot"></span></span>
+          <span class="marquee-item">Baumeister<span class="m-dot"></span></span>
+          <span class="marquee-item">ArchDaily<span class="m-dot"></span></span>
+          <span class="marquee-item">Domus<span class="m-dot"></span></span>
+          <span class="marquee-item">Moderne Regional<span class="m-dot"></span></span>
+          <span class="marquee-item">Dezeen<span class="m-dot"></span></span>
+          <span class="marquee-item">Wallpaper*<span class="m-dot"></span></span>
+          <span class="marquee-item">AD Germany<span class="m-dot"></span></span>
+          <span class="marquee-item">Detail<span class="m-dot"></span></span>
+          <span class="marquee-item">Baumeister<span class="m-dot"></span></span>
+          <span class="marquee-item">ArchDaily<span class="m-dot"></span></span>
+          <span class="marquee-item">Domus<span class="m-dot"></span></span>
+          <span class="marquee-item">Moderne Regional<span class="m-dot"></span></span>
         </div>
       </div>
     </section>
 
-    <!-- ── §9 KONTAKT ── -->
+    <!-- §7 KONTAKT -->
     <section id="kontakt">
-      <p class="eyebrow kontakt-kicker">Kontakt</p>
+      <div id="kontakt-ey-zone">
+        <div class="sec-ey-wrap">
+          <span class="sec-ey" id="ey-7" style="color:rgba(10,10,10,0.06);" aria-hidden="true">07 — KONTAKT</span>
+        </div>
+      </div>
       <h2 id="kontakt-headline" class="font-display">
-        Werkstatt für<br>neue Baukunst
+        <span class="kl-wrap"><span class="kl">Werkstatt für</span></span>
+        <span class="kl-wrap"><span class="kl">neue Baukunst</span></span>
       </h2>
       <a href="mailto:hallo@ateliermork.de" class="kontakt-link" tabindex="-1">
         hallo@ateliermork.de
       </a>
     </section>
 
-    <!-- ── §10 FOOTER ── -->
+    <!-- FOOTER -->
     <footer id="footer">
       <div>
         <p class="footer-mark">ATELIER MØRK</p>
-        <p class="f-val" style="margin-top:16px;">
-          Maximilianstraße 14<br>
-          95444 Bayreuth, DE
-        </p>
+        <p class="f-val" style="margin-top:16px;">Maximilianstraße 14<br>95444 Bayreuth, DE</p>
       </div>
-
       <div>
         <p class="f-label">Folgen</p>
         <div class="f-socials">
@@ -1025,506 +955,475 @@
           <a href="#">↗ Dezeen</a>
         </div>
       </div>
-
       <div style="text-align:right;">
         <p class="f-label">Ortszeit Bayreuth</p>
         <p class="f-val" id="footer-time">00:00</p>
-        <p class="f-val" style="margin-top:8px; opacity:0.45; font-size:13px;" id="footer-weather">
-          12°C · bedeckt · Wind aus NW
-        </p>
+        <p class="f-val" style="margin-top:8px;opacity:0.4;font-size:13px;">12°C · bedeckt · Wind aus NW</p>
       </div>
     </footer>
 
   </div><!-- #main-content -->
 
-  <!-- ═══════════════════════════════════════════ -->
-  <!-- SCRIPTS                                     -->
-  <!-- ═══════════════════════════════════════════ -->
+  <!-- ════════════════════════════════════════════ -->
+  <!-- MAIN SCRIPT                                  -->
+  <!-- ════════════════════════════════════════════ -->
   <script>
-  /* ═══════════════════════════════════════════════════════════ */
-  /* CINEMATIC INTRO — runs before main IIFE                     */
-  /* ═══════════════════════════════════════════════════════════ */
   (function () {
     'use strict';
 
-    const CONCRETE = 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=1920&q=90';
-    const REDUCED  = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const EE = 'cubic-bezier(0.65, 0, 0.35, 1)';
+    const EX = 'cubic-bezier(0.7,  0, 0.84, 0)';
+    const EO = 'cubic-bezier(0.16, 1, 0.3,  1)';
 
-    /* ── Reduced-motion: skip to final state ── */
-    if (REDUCED) {
-      document.getElementById('intro').style.display = 'none';
-      const heroBg = document.getElementById('hero-bg');
-      if (heroBg) heroBg.style.backgroundImage = `url('${CONCRETE}')`;
-      document.querySelectorAll('.o-breathe').forEach(el => {
-        el.style.animationPlayState = 'running';
-      });
-      window.__introActive = false;
-      return;
-    }
+    gsap.registerPlugin(ScrollTrigger);
 
-    /* ── Lock scroll (Lenis not yet initialised; body overflow suffices) ── */
-    document.body.style.overflow = 'hidden';
-    window.__introActive = true;
-    window.__onIntroComplete = null; // filled by main IIFE
+    /* ── Lenis ── */
+    const lenis = new Lenis({ lerp: 0.08, smoothWheel: true });
+    (function raf(t) { lenis.raf(t); requestAnimationFrame(raf); })(0);
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.lagSmoothing(0);
 
-    /* ── Build title letter-spans ── */
-    const TITLE = 'ATELIER MØRK';
-    const titleEl = document.getElementById('intro-title');
-    let lettersHTML = '';
-    for (const ch of TITLE) {
-      if (ch === ' ') {
-        lettersHTML += `<span class="intro-space" aria-hidden="true"></span>`;
-      } else if (ch === 'Ø') {
-        lettersHTML += `<span class="intro-letter o-breathe" aria-hidden="true">${ch}</span>`;
-      } else {
-        lettersHTML += `<span class="intro-letter" aria-hidden="true">${ch}</span>`;
-      }
-    }
-    titleEl.innerHTML = lettersHTML;
+    /* ════════════════════════════════════════════
+       CURSOR SYSTEM
+    ════════════════════════════════════════════ */
+    const cursor    = document.getElementById('cursor');
+    const curLabel  = document.getElementById('cursor-label');
+    const curInner  = document.getElementById('cursor-label-inner');
 
-    /* ── Live clock inside intro ── */
-    function pad(n) { return String(n).padStart(2, '0'); }
-    function tickIntro() {
-      const now = new Date();
-      const el = document.getElementById('intro-clock');
-      if (el) el.textContent =
-        `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-    }
-    tickIntro();
-    const introClockId = setInterval(tickIntro, 1000);
+    let cx = -200, cy = -200; // rendered
+    let tx = -200, ty = -200; // target raw mouse
+    let magEl = null;
+    let curMode = 'default'; // 'default' | 'magnetic' | 'view' | 'kontakt'
 
-    /* ── Easing constants ── */
-    const E_MAIN   = 'cubic-bezier(0.65, 0, 0.35, 1)';
-    const E_LETTER = 'cubic-bezier(0.16, 1, 0.3, 1)';
-
-    /* ── Set GSAP initial state for facade ── */
-    gsap.set('#intro-facade', {
-      xPercent: -50,
-      yPercent: -50,
-      clipPath: 'inset(49.9% 0% 49.9% 0%)',
-      rotateY: 0,
-    });
-    gsap.set(['#intro-concrete-img', '#intro-fg-gradient'], { opacity: 0 });
-    gsap.set('.intro-letter', { opacity: 0, y: 40 });
-
-    /* ═══════════════════════════════════════
-       MASTER TIMELINE
-    ═══════════════════════════════════════ */
-    const tl = gsap.timeline({
-      onComplete() {
-        clearInterval(introClockId);
-
-        /* Apply concrete bg to hero so the crossfade is seamless */
-        const heroBg = document.getElementById('hero-bg');
-        if (heroBg) heroBg.style.backgroundImage = `url('${CONCRETE}')`;
-
-        /* Start Ø breathing on both intro and hero */
-        document.querySelectorAll('.o-breathe').forEach(el => {
-          el.style.animationPlayState = 'running';
-        });
-
-        /* Ken-burns: slow scale on concrete img  */
-        gsap.fromTo('#intro-concrete-img',
-          { scale: 1.0 },
-          { scale: 1.06, duration: 24, ease: 'none', repeat: -1, yoyo: true }
-        );
-
-        /* Release Lenis (main IIFE sets the callback) */
-        document.body.style.overflow = '';
-        window.__introActive = false;
-        if (typeof window.__onIntroComplete === 'function') {
-          window.__onIntroComplete();
+    /* Lerp loop */
+    (function moveCursor() {
+      let fx = tx, fy = ty;
+      /* Magnetic pull */
+      if (magEl && curMode === 'magnetic') {
+        const r  = magEl.getBoundingClientRect();
+        const mx = r.left + r.width  / 2;
+        const my = r.top  + r.height / 2;
+        const dx = tx - mx, dy = ty - my;
+        const d  = Math.hypot(dx, dy);
+        if (d < 60) {
+          fx = mx + dx * 0.32;
+          fy = my + dy * 0.32;
         }
-
-        /* Dismiss intro on first intentional scroll */
-        let dismissed = false;
-        function dismissIntro() {
-          if (dismissed) return;
-          dismissed = true;
-          gsap.to('#intro', {
-            opacity: 0,
-            duration: 0.55,
-            ease: 'power2.out',
-            onComplete() {
-              const el = document.getElementById('intro');
-              if (el) el.style.display = 'none';
-              /* Ensure ScrollTrigger recalculates after overlay gone */
-              if (window.ScrollTrigger) window.ScrollTrigger.refresh();
-            }
-          });
-        }
-        window.addEventListener('wheel',      dismissIntro, { once: true, passive: true });
-        window.addEventListener('touchstart', dismissIntro, { once: true, passive: true });
-        window.addEventListener('keydown',    dismissIntro, { once: true });
       }
-    });
-
-    /* ─── Phase 1 · 0.0–1.0s — Hairline draws ──────────── */
-    tl
-      .fromTo('#intro-line',
-        { scaleX: 0 },
-        { scaleX: 1, duration: 1.0, ease: 'power2.inOut' },
-        0
-      )
-      .fromTo('#intro-est',
-        { opacity: 0, y: 5 },
-        { opacity: 1, y: 0, duration: 0.48, ease: E_LETTER },
-        0.4
-      )
-
-    /* ─── Phase 2 · 1.0–2.45s — Facade unfolds + HOLDS ─── */
-      /* fade line + label out in tandem with facade start */
-      .to('#intro-line',
-        { opacity: 0, duration: 0.18 },
-        1.0
-      )
-      .to('#intro-est',
-        { opacity: 0, duration: 0.18 },
-        1.0
-      )
-      /* facade unfolds: clipPath 49.9% → 0%, simultaneous rotateY 18° */
-      .fromTo('#intro-facade',
-        { clipPath: 'inset(49.9% 0% 49.9% 0%)', rotateY: 0, opacity: 1 },
-        { clipPath: 'inset(0% 0% 0% 0%)',        rotateY: 18, duration: 1.0, ease: E_MAIN },
-        1.08
-      )
-      /* ← holds at rotateY(18°) until 2.45s: ~0.37s intentional beat */
-
-    /* ─── Phase 3 · 2.45–3.7s — Concrete fades in, un-rotates ── */
-      .to('#intro-facade',
-        { rotateY: 0, duration: 0.9, ease: E_MAIN },
-        2.45
-      )
-      .to('#intro-concrete-img',
-        { opacity: 1, duration: 0.85, ease: 'power1.inOut' },
-        2.45
-      )
-      /* border dissolves before scale */
-      .to('#intro-facade',
-        { borderColor: 'rgba(255,255,255,0)', duration: 0.35 },
-        3.1
-      )
-
-    /* ─── Phase 4 · 3.7–5.0s — Plate covers viewport ──────── */
-      .to('#intro-facade',
-        { scale: 3.2, duration: 1.3, ease: 'power2.inOut' },
-        3.65
-      )
-      .to('#intro-fg-gradient',
-        { opacity: 1, duration: 0.65, ease: 'power1.out' },
-        4.15
-      )
-
-    /* ─── Phase 5 · 5.0–6.0s — Title types in ──────────────── */
-      .to('#intro-topbar',
-        { opacity: 1, duration: 0.52, ease: E_MAIN },
-        5.0
-      )
-      .fromTo('.intro-letter',
-        { opacity: 0, y: 40 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.52,
-          stagger: { each: 0.058, ease: 'none' },
-          ease: E_LETTER,
-        },
-        5.0
-      )
-      .to('#intro-category',
-        { opacity: 1, duration: 0.52, ease: E_MAIN },
-        5.6
-      );
-
-  })();
-
-  /* ═══════════════════════════════════════════════════════════ */
-  /* MAIN PAGE SCRIPT                                            */
-  /* ═══════════════════════════════════════════════════════════ */
-  (function () {
-    'use strict';
-
-    /* ── Cursor ── */
-    const cursor = document.getElementById('cursor');
-    let mx = -100, my = -100;
+      cx += (fx - cx) * 0.16;
+      cy += (fy - cy) * 0.16;
+      cursor.style.left   = cx + 'px';
+      cursor.style.top    = cy + 'px';
+      curLabel.style.left = cx + 'px';
+      curLabel.style.top  = cy + 'px';
+      requestAnimationFrame(moveCursor);
+    })();
 
     document.addEventListener('mousemove', e => {
-      mx = e.clientX;
-      my = e.clientY;
-      cursor.style.left = mx + 'px';
-      cursor.style.top  = my + 'px';
-      if (!cursor.classList.contains('active')) cursor.classList.add('active');
+      tx = e.clientX; ty = e.clientY;
+      cursor.classList.add('visible');
     });
-    document.addEventListener('mouseleave', () => cursor.classList.remove('active'));
+    document.addEventListener('mouseleave', () => cursor.classList.remove('visible'));
 
-    /* ── Live clocks ── */
+    function setCursorMode(mode) {
+      curMode = mode;
+      cursor.classList.remove('visible');
+      /* Reset */
+      cursor.style.transform = 'translate(-50%,-50%) scale(1)';
+      curLabel.classList.remove('visible', 'spinning');
+      switch (mode) {
+        case 'magnetic':
+          cursor.style.transform = 'translate(-50%,-50%) scale(1.6)';
+          break;
+        case 'view':
+          cursor.style.transform = 'translate(-50%,-50%) scale(2.86)'; /* 28 * 2.86 ≈ 80px */
+          curLabel.classList.add('visible', 'spinning');
+          break;
+        case 'kontakt':
+          cursor.style.transform = 'translate(-50%,-50%) scale(4.3)'; /* ≈ 120px */
+          break;
+      }
+      cursor.classList.add('visible');
+    }
+
+    /* Magnetic elements: links */
+    document.querySelectorAll('.kontakt-link, .f-socials a').forEach(el => {
+      el.addEventListener('mouseenter', () => { magEl = el; setCursorMode('magnetic'); });
+      el.addEventListener('mouseleave', () => { magEl = null; setCursorMode('default'); });
+    });
+
+    /* Kontakt section: 120px cursor */
+    const kontaktSec = document.getElementById('kontakt');
+    kontaktSec.addEventListener('mouseenter', () => setCursorMode('kontakt'));
+    kontaktSec.addEventListener('mouseleave', () => setCursorMode('default'));
+
+    /* ════════════════════════════════════════════
+       HERO — SCROLL-DRIVEN TYPE MASK
+    ════════════════════════════════════════════ */
+    const heroTitleWrap = document.getElementById('hero-title-wrap');
+    const heroTitle     = document.getElementById('hero-title');
+    const heroPhoto     = document.getElementById('hero-photo');
+    const heroMask      = document.getElementById('hero-photo-mask');
+    const heroGrad      = document.getElementById('hero-grad');
+
+    if (!REDUCED) {
+      /* Phase 1: 0 → 100vh — title shrinks, photo reveals */
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: '#hero-zone',
+          start: 'top top',
+          end: '+=100%',
+          scrub: 1,
+          invalidateOnRefresh: true,
+        }
+      })
+      .to(heroMask, { opacity: 0, ease: 'none' }, 0)
+      .fromTo(heroPhoto, { scale: 1.1 }, { scale: 1.4, ease: 'none' }, 0)
+      .to(heroGrad, { opacity: 1, ease: 'none' }, 0)
+      /* Title: scale to 0.3 and move toward top-left */
+      .to(heroTitleWrap, {
+        x: () => -window.innerWidth  * 0.30,
+        y: () => -window.innerHeight * 0.36,
+        scale: 0.3,
+        ease: 'power1.inOut',
+        transformOrigin: 'center center',
+        invalidateOnRefresh: true,
+      }, 0);
+
+      /* Phase 2: 40% → 100% hero-zone — bone white wipe + nav mark */
+      const wipe    = document.getElementById('white-wipe');
+      const navMark = document.getElementById('nav-mark');
+      gsap.timeline({
+        scrollTrigger: {
+          trigger: '#hero-zone',
+          start: '40% top',
+          end: 'bottom top',
+          scrub: 1,
+        }
+      })
+      .fromTo(wipe,
+        { clipPath: 'inset(100% 0 0 0)' },
+        { clipPath: 'inset(0% 0 0 0)', ease: 'none' }
+      )
+      .fromTo(navMark,
+        { opacity: 0, y: -6 },
+        { opacity: 1, y: 0, ease: 'none', duration: 0.3 },
+        0.7
+      );
+    } else {
+      /* Reduced motion: show final states */
+      heroMask.style.opacity = '0';
+      document.getElementById('white-wipe').style.clipPath = 'inset(0%)';
+    }
+
+    /* ════════════════════════════════════════════
+       SECTION EYEBROW CHARACTER REVEALS
+    ════════════════════════════════════════════ */
+    const eyebrowDefs = [
+      { id: 'ey-1', trigger: '#sec-manifest'   },
+      { id: 'ey-2', trigger: '#sec-arbeiten'   },
+      { id: 'ey-3', trigger: '#featured'       },
+      { id: 'ey-4', trigger: '#materials'      },
+      { id: 'ey-5', trigger: '#prozess'        },
+      { id: 'ey-6', trigger: '#awards'         },
+      { id: 'ey-7', trigger: '#kontakt'        },
+    ];
+
+    eyebrowDefs.forEach(({ id, trigger }) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const txt = el.textContent;
+      const col = el.style.color;
+      el.textContent = '';
+      let html = '';
+      for (const ch of txt) {
+        if (ch === ' ') {
+          html += '<span class="ey-sp"></span>';
+        } else {
+          html += `<span style="display:inline-block;overflow:hidden;vertical-align:bottom;"><span class="ey-ch" style="color:${col};">${ch === '—' ? '&mdash;' : ch}</span></span>`;
+        }
+      }
+      el.innerHTML = html;
+      if (REDUCED) {
+        el.querySelectorAll('.ey-ch').forEach(c => { c.style.transform = 'none'; });
+        return;
+      }
+      gsap.to(el.querySelectorAll('.ey-ch'), {
+        y: 0,
+        duration: 0.85,
+        stagger: { each: 0.038, ease: 'none' },
+        ease: EE,
+        scrollTrigger: { trigger, start: 'top 88%' }
+      });
+    });
+
+    /* ════════════════════════════════════════════
+       MANIFESTO — word reveal
+    ════════════════════════════════════════════ */
+    const mEl  = document.getElementById('manifesto-text');
+    const GPH  = '___GLYPH___';
+    mEl.innerHTML = mEl.innerHTML.replace(/<span class="glyph-mark"[\s\S]*?<\/span>/, GPH);
+    const mWords = mEl.textContent.trim().split(/\s+/);
+    let mHtml = '';
+    mWords.forEach(w => {
+      if (w === GPH) {
+        mHtml += `<span class="glyph-mark" aria-hidden="true"><svg width="22" height="30" viewBox="0 0 24 32" fill="none"><path d="M12 2.5 C7 6, 3.5 12, 4.5 19 C5.5 25.5, 9.5 29.5, 12 29.5" stroke="#0A0A0A" stroke-width="1.2" stroke-linecap="round" fill="none"/><path d="M12 2.5 C17 6, 20.5 12, 19.5 19 C18.5 25.5, 14.5 29.5, 12 29.5" stroke="#0A0A0A" stroke-width="1.2" stroke-linecap="round" fill="none"/><path d="M5.5 16.5 L18.5 16.5" stroke="#0A0A0A" stroke-width="1" stroke-linecap="round"/><path d="M12 2.5 L12 29.5" stroke="#0A0A0A" stroke-width="0.6" stroke-linecap="round" opacity="0.4"/></svg></span> `;
+      } else {
+        mHtml += `<span class="word">${w}</span> `;
+      }
+    });
+    mEl.innerHTML = mHtml;
+    if (!REDUCED) {
+      gsap.to('.word', {
+        opacity: 1, y: 0, duration: 0.5, stagger: 0.07, ease: 'power2.out',
+        scrollTrigger: { trigger: '#manifesto-text', start: 'top 74%' }
+      });
+    }
+
+    /* ════════════════════════════════════════════
+       PROJECT INDEX — turbulence distortion
+    ════════════════════════════════════════════ */
+    const thumb    = document.getElementById('project-thumb');
+    const thumbImg = document.getElementById('thumb-img');
+    const dispNode = document.getElementById('disp-node');
+    let tX = -400, tY = -400, ttX = -400, ttY = -400;
+    let turbAnim  = null;
+    let turbCur   = 0;
+
+    document.addEventListener('mousemove', e => { ttX = e.clientX; ttY = e.clientY; });
+    (function moveThumb() {
+      tX += (ttX - tX) * 0.10;
+      tY += (ttY - tY) * 0.10;
+      thumb.style.left = tX + 'px';
+      thumb.style.top  = tY + 'px';
+      requestAnimationFrame(moveThumb);
+    })();
+
+    function setDisp(v) {
+      turbCur = v;
+      dispNode.setAttribute('scale', String(Math.max(0, v)));
+    }
+
+    const rows = document.querySelectorAll('.project-row');
+    rows.forEach(row => {
+      const src = row.dataset.img;
+
+      row.addEventListener('mouseenter', () => {
+        thumbImg.src = src;
+        thumb.style.filter  = 'url(#turb-filter)';
+        gsap.to(thumb, { opacity: 1, duration: 0.25, ease: EO });
+
+        setCursorMode('view');
+        magEl = row;
+
+        if (turbAnim) turbAnim.kill();
+        turbAnim = gsap.timeline();
+        /* Ramp 0 → 80 */
+        turbAnim.to({ v: turbCur }, {
+          v: 80, duration: 0.3, ease: EO,
+          onUpdate() { setDisp(this.targets()[0].v); }
+        });
+        /* Settle 80 → 20 */
+        turbAnim.to({ v: 80 }, {
+          v: 20, duration: 0.3, ease: EE,
+          onUpdate() { setDisp(this.targets()[0].v); }
+        });
+        /* Gentle wave loop */
+        turbAnim.call(() => {
+          turbAnim = gsap.to({ v: 12 }, {
+            v: 18,
+            duration: 2,
+            ease: 'sine.inOut',
+            repeat: -1,
+            yoyo: true,
+            onUpdate() { setDisp(this.targets()[0].v); }
+          });
+        });
+      });
+
+      row.addEventListener('mouseleave', () => {
+        if (turbAnim) turbAnim.kill();
+        /* Explosion exit */
+        const startVal = turbCur;
+        turbAnim = gsap.to({ v: startVal }, {
+          v: 120, duration: 0.22, ease: EX,
+          onUpdate() { setDisp(this.targets()[0].v); },
+          onComplete() { setDisp(0); }
+        });
+        gsap.to(thumb, { opacity: 0, duration: 0.35, ease: EX });
+
+        magEl = null;
+        setCursorMode('default');
+      });
+    });
+
+    /* Row entrance */
+    gsap.from('.project-row', {
+      opacity: 0, y: 14, duration: 0.55, stagger: 0.065, ease: 'power2.out',
+      scrollTrigger: { trigger: '#project-list', start: 'top 82%' }
+    });
+
+    /* ════════════════════════════════════════════
+       FEATURED — pinned horizontal + captions
+    ════════════════════════════════════════════ */
+    const featPano     = document.getElementById('featured-panorama');
+    const featFill     = document.getElementById('feat-prog-fill');
+    const FEAT_TRAVEL  = 2400; /* px */
+
+    /* Caption config */
+    const caps = [
+      { id: 'fc-1', enter: 0.04, exit: 0.26, ox:  0,   oy: -50 },
+      { id: 'fc-2', enter: 0.20, exit: 0.45, ox: -50,  oy:   0 },
+      { id: 'fc-3', enter: 0.40, exit: 0.64, ox:  0,   oy:  50 },
+      { id: 'fc-4', enter: 0.58, exit: 0.82, ox:  50,  oy:   0 },
+      { id: 'fc-5', enter: 0.76, exit: 1.00, ox:  0,   oy: -50 },
+    ];
+    const capEls = caps.map(c => ({ ...c, el: document.getElementById(c.id) }));
+    /* Set initial states */
+    capEls.forEach(c => { gsap.set(c.el, { opacity: 0, x: c.ox, y: c.oy }); });
+
+    ScrollTrigger.create({
+      trigger: '#featured-sticky',
+      start: 'top top',
+      end: () => `+=${window.innerHeight * 4}`,
+      pin: true,
+      scrub: 1,
+      invalidateOnRefresh: true,
+      onUpdate(self) {
+        const p = self.progress;
+
+        /* Panorama translate */
+        gsap.set(featPano, { x: -FEAT_TRAVEL * p });
+
+        /* Progress bar */
+        featFill.style.width = (p * 100).toFixed(1) + '%';
+
+        /* Captions */
+        capEls.forEach(c => {
+          if (p < c.enter || p > c.exit) {
+            const isAfter = p > c.exit;
+            gsap.set(c.el, {
+              opacity: 0,
+              x: isAfter ? -c.ox * 0.4 : c.ox,
+              y: isAfter ? -c.oy * 0.4 : c.oy,
+            });
+          } else {
+            const span = c.exit - c.enter;
+            const loc  = (p - c.enter) / span;
+            const iFrac = Math.min(loc / 0.22, 1);
+            const oFrac = Math.max((loc - 0.78) / 0.22, 0);
+            const opacity = loc < 0.22
+              ? iFrac
+              : (loc > 0.78 ? 1 - oFrac : 1);
+            const x = loc < 0.22
+              ? c.ox * (1 - iFrac)
+              : (loc > 0.78 ? -c.ox * oFrac * 0.4 : 0);
+            const y = loc < 0.22
+              ? c.oy * (1 - iFrac)
+              : (loc > 0.78 ? -c.oy * oFrac * 0.4 : 0);
+            gsap.set(c.el, { opacity, x, y });
+          }
+        });
+      }
+    });
+
+    /* ════════════════════════════════════════════
+       MATERIALS — pinned slab wipe sequence
+    ════════════════════════════════════════════ */
+    const matPanels = [1, 2, 3, 4].map(i => document.getElementById('mat-' + i));
+    const matSlab   = document.getElementById('mat-slab');
+    let matCurrent  = 0;
+    let matWiping   = false;
+    let matPending  = -1;
+
+    matPanels.forEach((p, i) => { p.style.opacity = i === 0 ? '1' : '0'; });
+
+    function doMatWipe(toIdx) {
+      if (toIdx === matCurrent) return;
+      if (matWiping) { matPending = toIdx; return; }
+      matWiping = true;
+      const tl = gsap.timeline({
+        onComplete() {
+          matWiping = false;
+          const next = matPending;
+          matPending = -1;
+          if (next !== -1 && next !== matCurrent) doMatWipe(next);
+        }
+      });
+      /* Slab enters from left */
+      tl.fromTo(matSlab, { x: '-101%' }, { x: '0%', duration: 0.32, ease: EE });
+      /* Swap panels under slab */
+      tl.call(() => {
+        matPanels[matCurrent].style.opacity = '0';
+        matPanels[toIdx].style.opacity = '1';
+        matCurrent = toIdx;
+      });
+      /* Slab exits right */
+      tl.to(matSlab, { x: '101%', duration: 0.32, ease: EX });
+      tl.set(matSlab, { x: '-101%' });
+    }
+
+    ScrollTrigger.create({
+      trigger: '#materials-sticky',
+      start: 'top top',
+      end: () => `+=${window.innerHeight * 4}`,
+      pin: true,
+      invalidateOnRefresh: true,
+      onUpdate(self) {
+        const p   = self.progress;
+        const idx = p < 0.25 ? 0 : p < 0.5 ? 1 : p < 0.75 ? 2 : 3;
+        if (idx !== matCurrent) doMatWipe(idx);
+      }
+    });
+
+    /* ════════════════════════════════════════════
+       PROZESS — staggered reveal
+    ════════════════════════════════════════════ */
+    document.querySelectorAll('.prozess-item').forEach((item, i) => {
+      if (REDUCED) { item.style.opacity = '1'; item.style.transform = 'none'; return; }
+      gsap.to(item, {
+        opacity: 1, y: 0, duration: 0.6, ease: 'power2.out', delay: i * 0.035,
+        scrollTrigger: { trigger: item, start: 'top 83%' }
+      });
+      gsap.to(item.querySelector('.prozess-title'), {
+        y: -18, ease: 'none',
+        scrollTrigger: { trigger: item, start: 'top bottom', end: 'bottom top', scrub: 1.2 }
+      });
+    });
+
+    /* ════════════════════════════════════════════
+       KONTAKT — line-by-line clip reveal
+    ════════════════════════════════════════════ */
+    if (!REDUCED) {
+      gsap.to('.kl', {
+        y: 0,
+        duration: 0.85,
+        stagger: 0.08,
+        ease: EE,
+        scrollTrigger: { trigger: '#kontakt', start: 'top 72%' }
+      });
+    }
+
+    /* ════════════════════════════════════════════
+       LIVE CLOCK
+    ════════════════════════════════════════════ */
     function pad(n) { return String(n).padStart(2, '0'); }
     function tick() {
       const now = new Date();
       const hms = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       const hm  = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
-      const el1 = document.getElementById('hero-time');
-      const el2 = document.getElementById('footer-time');
-      if (el1) el1.textContent = hms;
-      if (el2) el2.textContent = hm + ' CET';
+      const t1  = document.getElementById('hero-time');
+      const t2  = document.getElementById('footer-time');
+      if (t1) t1.textContent = hms;
+      if (t2) t2.textContent = hm + ' CET';
     }
     tick();
     setInterval(tick, 1000);
 
-    /* ── Lenis smooth scroll ── */
-    const lenis = new Lenis({ lerp: 0.08, smoothWheel: true });
-    function rafLoop(time) { lenis.raf(time); requestAnimationFrame(rafLoop); }
-    requestAnimationFrame(rafLoop);
-
-    /* ── Pause Lenis while intro is active ── */
-    if (window.__introActive) {
-      lenis.stop();
-      window.__onIntroComplete = function () {
-        lenis.start();
-      };
-    }
-
-    /* ── GSAP register ── */
-    gsap.registerPlugin(ScrollTrigger);
-
-    // Keep ScrollTrigger in sync with Lenis
-    lenis.on('scroll', ScrollTrigger.update);
-    gsap.ticker.lagSmoothing(0);
-
-    /* ─────────────────────────────────────────── */
-    /* §2  INVERSION WIPE                          */
-    /* ─────────────────────────────────────────── */
-    const wipe    = document.getElementById('white-wipe');
-    const navMark = document.getElementById('nav-mark');
-
-    gsap.timeline({
-      scrollTrigger: {
-        trigger: '#hero-zone',
-        start: '40% top',          // wipe begins after hero is well-established
-        end: 'bottom top',
-        scrub: 1,
-      }
-    })
-    .fromTo(wipe,
-      { clipPath: 'inset(100% 0 0 0)' },
-      { clipPath: 'inset(0% 0 0 0)', ease: 'none' }
-    )
-    .fromTo(navMark,
-      { opacity: 0, y: -6 },
-      { opacity: 1, y: 0, ease: 'none', duration: 0.3 },
-      0.7  // starts at 70% through the wipe timeline
-    );
-
-    /* ─────────────────────────────────────────── */
-    /* §3  MANIFESTO — word-by-word reveal         */
-    /* ─────────────────────────────────────────── */
-    const manifestoEl = document.getElementById('manifesto-text');
-
-    // Replace glyph span with placeholder so it survives the word-split
-    const glyphPlaceholder = '___GLYPH___';
-    manifestoEl.innerHTML = manifestoEl.innerHTML.replace(
-      /<span class="glyph-mark"[\s\S]*?<\/span>/,
-      glyphPlaceholder
-    );
-
-    const rawText = manifestoEl.textContent;
-    const words   = rawText.trim().split(/\s+/);
-
-    let html = '';
-    words.forEach(w => {
-      if (w === glyphPlaceholder) {
-        html += `<span class="glyph-mark" aria-hidden="true">
-          <svg width="24" height="32" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2.5 C7 6, 3.5 12, 4.5 19 C5.5 25.5, 9.5 29.5, 12 29.5" stroke="#0A0A0A" stroke-width="1.2" stroke-linecap="round" fill="none"/>
-            <path d="M12 2.5 C17 6, 20.5 12, 19.5 19 C18.5 25.5, 14.5 29.5, 12 29.5" stroke="#0A0A0A" stroke-width="1.2" stroke-linecap="round" fill="none"/>
-            <path d="M5.5 16.5 L18.5 16.5" stroke="#0A0A0A" stroke-width="1" stroke-linecap="round"/>
-            <path d="M12 2.5 L12 29.5" stroke="#0A0A0A" stroke-width="0.6" stroke-linecap="round" opacity="0.4"/>
-          </svg>
-        </span> `;
-      } else {
-        html += `<span class="word">${w}</span> `;
-      }
-    });
-    manifestoEl.innerHTML = html;
-
-    // Kicker reveal
-    gsap.to('#manifesto-kicker', {
-      opacity: 0.35, y: 0, duration: 0.6, ease: 'power2.out',
-      scrollTrigger: { trigger: '#manifesto-kicker', start: 'top 85%' }
-    });
-
-    // Words
-    gsap.to('.word', {
-      opacity: 1,
-      y: 0,
-      duration: 0.45,
-      stagger: 0.08,
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: '#manifesto-text',
-        start: 'top 72%',
-        toggleActions: 'play none none none',
-      }
-    });
-
-    /* ─────────────────────────────────────────── */
-    /* §4  PROJECT INDEX — cursor thumbnail        */
-    /* ─────────────────────────────────────────── */
-    gsap.to('#projects-kicker', {
-      opacity: 0.35, y: 0, duration: 0.6, ease: 'power2.out',
-      scrollTrigger: { trigger: '#projects-kicker', start: 'top 85%' }
-    });
-
-    const thumb      = document.getElementById('project-thumb');
-    const thumbImg   = document.getElementById('thumb-img');
-    const rows       = document.querySelectorAll('.project-row');
-    let tX = -300, tY = -300;
-    let tTargetX = -300, tTargetY = -300;
-
-    document.addEventListener('mousemove', e => {
-      tTargetX = e.clientX;
-      tTargetY = e.clientY;
-    });
-
-    (function lerpThumb() {
-      tX += (tTargetX - tX) * 0.10;
-      tY += (tTargetY - tY) * 0.10;
-      thumb.style.left = tX + 'px';
-      thumb.style.top  = tY + 'px';
-      requestAnimationFrame(lerpThumb);
-    })();
-
-    rows.forEach(row => {
-      const src = row.dataset.img;
-      row.addEventListener('mouseenter', () => {
-        thumbImg.src = src;
-        thumb.style.opacity = '1';
-      });
-      row.addEventListener('mouseleave', () => {
-        thumb.style.opacity = '0';
-      });
-    });
-
-    // Staggered row entrance
-    gsap.from('.project-row', {
-      opacity: 0,
-      y: 16,
-      duration: 0.6,
-      stagger: 0.07,
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: '#project-list',
-        start: 'top 80%',
-      }
-    });
-
-    /* ─────────────────────────────────────────── */
-    /* §5  FEATURED — horizontal scroll pin        */
-    /* ─────────────────────────────────────────── */
-    const featTrack = document.getElementById('featured-track');
-
-    function featScrollDist() {
-      return featTrack.scrollWidth - window.innerWidth + 160;
-    }
-
-    const featST = ScrollTrigger.create({
-      trigger: '#featured-sticky',
-      start: 'top top',
-      end: () => '+=' + featScrollDist(),
-      pin: true,
-      scrub: 1,
-      invalidateOnRefresh: true,
-      onUpdate(self) {
-        const x = -featScrollDist() * self.progress;
-        gsap.set(featTrack, { x });
-        // Annotations
-        const p = self.progress;
-        document.getElementById('feat-ann-1').classList.toggle('visible', p > 0.12 && p < 0.55);
-        document.getElementById('feat-ann-2').classList.toggle('visible', p > 0.35 && p < 0.75);
-        document.getElementById('feat-ann-3').classList.toggle('visible', p > 0.62);
-      }
-    });
-
-    /* ─────────────────────────────────────────── */
-    /* §6  MATERIALS kicker                        */
-    /* ─────────────────────────────────────────── */
-    gsap.from('#materials-kicker', {
-      opacity: 0, y: 10, duration: 0.6, ease: 'power2.out',
-      scrollTrigger: { trigger: '#materials-kicker', start: 'top 85%' }
-    });
-
-    /* ─────────────────────────────────────────── */
-    /* §7  PROZESS — staggered reveal + parallax   */
-    /* ─────────────────────────────────────────── */
-    gsap.from('#prozess-kicker', {
-      opacity: 0, y: 10, duration: 0.6, ease: 'power2.out',
-      scrollTrigger: { trigger: '#prozess-kicker', start: 'top 85%' }
-    });
-
-    const prozessItems = document.querySelectorAll('.prozess-item');
-    prozessItems.forEach((item, i) => {
-      gsap.to(item, {
-        opacity: 1,
-        y: 0,
-        duration: 0.65,
-        ease: 'power2.out',
-        scrollTrigger: {
-          trigger: item,
-          start: 'top 82%',
-          toggleActions: 'play none none none',
-        },
-        delay: i * 0.04,
-      });
-
-      // Subtle parallax on title
-      gsap.to(item.querySelector('.prozess-title'), {
-        y: -20,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: item,
-          start: 'top bottom',
-          end: 'bottom top',
-          scrub: 1.2,
-        }
-      });
-    });
-
-    /* ─────────────────────────────────────────── */
-    /* §9  KONTAKT — headline entrance             */
-    /* ─────────────────────────────────────────── */
-    gsap.from('#kontakt-headline', {
-      opacity: 0,
-      y: 18,
-      duration: 1.0,
-      ease: 'power3.out',
-      scrollTrigger: {
-        trigger: '#kontakt',
-        start: 'top 70%',
-      }
-    });
-
-    // Kontakt custom cursor behaviour
-    const kontakt = document.getElementById('kontakt');
-    kontakt.addEventListener('mouseenter', () => {
-      cursor.classList.add('large');
-    });
-    kontakt.addEventListener('mouseleave', () => {
-      cursor.classList.remove('large');
-    });
-
-    /* ─────────────────────────────────────────── */
-    /* Reduced motion override                     */
-    /* ─────────────────────────────────────────── */
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      document.querySelectorAll('.word').forEach(w => {
-        w.style.opacity = '1';
-        w.style.transform = 'none';
-      });
-    }
-
-    /* ─────────────────────────────────────────── */
-    /* ScrollTrigger refresh on fonts load         */
-    /* ─────────────────────────────────────────── */
+    /* ════════════════════════════════════════════
+       REFRESH ON FONTS
+    ════════════════════════════════════════════ */
     document.fonts.ready.then(() => ScrollTrigger.refresh());
 
   })();
